@@ -3614,7 +3614,7 @@ function Library:CreateWindow(...)
                 InputService.MouseIconEnabled = false;
 
                 while Toggled and ScreenGui.Parent do
-                    local MousePosition = GetMousePosition();
+                    local MousePosition = InputService:GetMouseLocation();
 
                     Cursor.Color = Library.AccentColor;
                     Cursor.PointA = MousePosition;
