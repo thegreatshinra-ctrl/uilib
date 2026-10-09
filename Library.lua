@@ -3683,15 +3683,36 @@ function Library:CreateWindow(...)
                 BackgroundColor3 = 'BackgroundColor';
             });
 
+            local HasIcon = Info.Icon ~= nil and Info.Icon ~= '';
             local GroupboxLabel = Library:CreateLabel({
-                Size = UDim2.new(1, -16, 0, 17);
-                Position = UDim2.new(0, 8, 0, 4);
+                Size = UDim2.new(1, HasIcon and -34 or -16, 0, 17);
+                Position = UDim2.new(0, HasIcon and 26 or 8, 0, 4);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
+
+            if HasIcon then
+                assert(type(Info.Icon) == 'string' or type(Info.Icon) == 'number', 'AddGroupbox: `Icon` must be an asset ID or image URI.');
+                local Icon = tostring(Info.Icon);
+                if type(Info.Icon) == 'number' or Icon:match('^%d+$') then
+                    Icon = 'rbxassetid://' .. Icon;
+                end;
+
+                local IconLabel = Library:Create('ImageLabel', {
+                    BackgroundTransparency = 1;
+                    Image = Icon;
+                    ImageColor3 = Library.FontColor;
+                    Position = UDim2.new(0, 8, 0, 5);
+                    Size = UDim2.fromOffset(14, 14);
+                    ScaleType = Enum.ScaleType.Fit;
+                    ZIndex = 5;
+                    Parent = BoxInner;
+                });
+                Library:AddToRegistry(IconLabel, { ImageColor3 = 'FontColor' });
+            end;
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
@@ -3730,12 +3751,12 @@ function Library:CreateWindow(...)
             return Groupbox;
         end;
 
-        function Tab:AddLeftGroupbox(Name)
-            return Tab:AddGroupbox({ Side = 1; Name = Name; });
+        function Tab:AddLeftGroupbox(Name, Icon)
+            return Tab:AddGroupbox({ Side = 1; Name = Name; Icon = Icon; });
         end;
 
-        function Tab:AddRightGroupbox(Name)
-            return Tab:AddGroupbox({ Side = 2; Name = Name; });
+        function Tab:AddRightGroupbox(Name, Icon)
+            return Tab:AddGroupbox({ Side = 2; Name = Name; Icon = Icon; });
         end;
 
         function Tab:AddTabbox(Info)
