@@ -342,60 +342,82 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     end)
 end
 
-function Library:OnHighlight(HighlightInstance, Instance, Properties, PropertiesDefault)
+function Library:OnHighlight(HighlightInstance, HighlightedInstance, Properties, PropertiesDefault)
     local HoverStroke = Instance.new('UIStroke');
     HoverStroke.Color = Library.AccentColor;
-    HoverStroke.Thickness = 1;
+    HoverStroke.Thickness = 2;
     HoverStroke.Transparency = 1;
-    HoverStroke.Parent = HighlightInstance;
+    HoverStroke.Parent = HighlightedInstance;
     Library:AddToRegistry(HoverStroke, {
         Color = 'AccentColor';
     });
 
-    local HoverTween;
+    local HoverScale = Instance.new('UIScale');
+    HoverScale.Scale = 1;
+    HoverScale.Parent = HighlightedInstance;
+    local StrokeTween;
+    local ScaleTween;
 
     HighlightInstance.MouseEnter:Connect(function()
-        local Reg = Library.RegistryMap[Instance];
+        local Reg = Library.RegistryMap[HighlightedInstance];
 
         for Property, ColorIdx in next, Properties do
-            Instance[Property] = Library[ColorIdx] or ColorIdx;
+            HighlightedInstance[Property] = Library[ColorIdx] or ColorIdx;
 
             if Reg and Reg.Properties[Property] then
                 Reg.Properties[Property] = ColorIdx;
             end;
         end;
 
-        if HoverTween then
-            HoverTween:Cancel();
+        if StrokeTween then
+            StrokeTween:Cancel();
         end;
-        HoverTween = TweenService:Create(
+        if ScaleTween then
+            ScaleTween:Cancel();
+        end;
+        StrokeTween = TweenService:Create(
             HoverStroke,
-            TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-            { Transparency = 0.3 }
+            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+            { Transparency = 0.12 }
         );
-        HoverTween:Play();
+        ScaleTween = TweenService:Create(
+            HoverScale,
+            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+            { Scale = 1.04 }
+        );
+        StrokeTween:Play();
+        ScaleTween:Play();
     end)
 
     HighlightInstance.MouseLeave:Connect(function()
-        local Reg = Library.RegistryMap[Instance];
+        local Reg = Library.RegistryMap[HighlightedInstance];
 
         for Property, ColorIdx in next, PropertiesDefault do
-            Instance[Property] = Library[ColorIdx] or ColorIdx;
+            HighlightedInstance[Property] = Library[ColorIdx] or ColorIdx;
 
             if Reg and Reg.Properties[Property] then
                 Reg.Properties[Property] = ColorIdx;
             end;
         end;
 
-        if HoverTween then
-            HoverTween:Cancel();
+        if StrokeTween then
+            StrokeTween:Cancel();
         end;
-        HoverTween = TweenService:Create(
+        if ScaleTween then
+            ScaleTween:Cancel();
+        end;
+        StrokeTween = TweenService:Create(
             HoverStroke,
             TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             { Transparency = 1 }
         );
-        HoverTween:Play();
+        ScaleTween = TweenService:Create(
+            HoverScale,
+            TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            { Scale = 1 }
+        );
+        StrokeTween:Play();
+        ScaleTween:Play();
     end)
 end;
 
@@ -2211,6 +2233,21 @@ do
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'Black' }
         );
+
+        local ToggleLabelRegistry = Library.RegistryMap[ToggleLabel];
+        ToggleRegion.MouseEnter:Connect(function()
+            ToggleLabel.TextColor3 = Library.AccentColor;
+            if ToggleLabelRegistry then
+                ToggleLabelRegistry.Properties.TextColor3 = 'AccentColor';
+            end;
+        end);
+        ToggleRegion.MouseLeave:Connect(function()
+            local TextColor = Toggle.Risky and Library.RiskColor or Library.FontColor;
+            ToggleLabel.TextColor3 = TextColor;
+            if ToggleLabelRegistry then
+                ToggleLabelRegistry.Properties.TextColor3 = Toggle.Risky and 'RiskColor' or 'FontColor';
+            end;
+        end);
 
         function Toggle:UpdateColors()
             Toggle:Display();
