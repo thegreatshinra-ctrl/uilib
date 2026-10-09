@@ -3,6 +3,7 @@ local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
 local Teams = game:GetService('Teams');
 local Players = game:GetService('Players');
+local MarketplaceService = game:GetService('MarketplaceService');
 local Lighting = game:GetService('Lighting');
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService');
@@ -396,7 +397,7 @@ end
 function Library:OnHighlight(HighlightInstance, HighlightedInstance, Properties, PropertiesDefault)
     local HoverStroke = Instance.new('UIStroke');
     HoverStroke.Color = Library.AccentColor;
-    HoverStroke.Thickness = 2;
+    HoverStroke.Thickness = 1;
     HoverStroke.Transparency = 1;
     HoverStroke.Parent = HighlightedInstance;
     Library:AddToRegistry(HoverStroke, {
@@ -3670,10 +3671,41 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
+    local FooterLeftLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 12, 1, -24);
+        Size = UDim2.new(0.5, -18, 0, 16);
+        Text = type(Config.FooterLeft) == 'string' and Config.FooterLeft or 'Loading game...';
+        TextColor3 = Color3.fromRGB(145, 145, 145);
+        TextSize = 12;
+        TextTruncate = Enum.TextTruncate.AtEnd;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 2;
+        Parent = Inner;
+    });
+
+    if type(Config.FooterLeft) ~= 'string' then
+        task.spawn(function()
+            local Success, ProductInfo = pcall(function()
+                return MarketplaceService:GetProductInfo(game.PlaceId);
+            end);
+
+            if Success and type(ProductInfo) == 'table' and type(ProductInfo.Name) == 'string' and ProductInfo.Name ~= '' then
+                FooterLeftLabel.Text = ProductInfo.Name;
+            else
+                if Success then
+                    warn('Library footer game name lookup returned no name for place ' .. tostring(game.PlaceId) .. '.');
+                else
+                    warn('Library footer game name lookup failed: ' .. tostring(ProductInfo));
+                end;
+                FooterLeftLabel.Text = 'Unknown experience';
+            end;
+        end);
+    end;
+
     local FooterRight = Config.FooterRight or ('Build: ' .. os.date('%b. ') .. tonumber(os.date('%d')) .. os.date(', %Y'));
     local FooterRightLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 0, 1, -24);
-        Size = UDim2.new(1, -12, 0, 16);
+        Position = UDim2.new(0.5, 0, 1, -24);
+        Size = UDim2.new(0.5, -12, 0, 16);
         Text = FooterRight;
         TextColor3 = Color3.fromRGB(145, 145, 145);
         TextSize = 12;
