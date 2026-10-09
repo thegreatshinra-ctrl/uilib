@@ -3,6 +3,7 @@ local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
 local Teams = game:GetService('Teams');
 local Players = game:GetService('Players');
+local Lighting = game:GetService('Lighting');
 local RunService = game:GetService('RunService')
 local TweenService = game:GetService('TweenService');
 local RenderStepped = RunService.RenderStepped;
@@ -441,6 +442,16 @@ function Library:Unload()
     if Library.OnUnload then
         Library.OnUnload()
     end
+
+    if Library.BackgroundBlurTween then
+        Library.BackgroundBlurTween:Cancel();
+        Library.BackgroundBlurTween = nil;
+    end;
+
+    if Library.BackgroundBlurEffect then
+        Library.BackgroundBlurEffect:Destroy();
+        Library.BackgroundBlurEffect = nil;
+    end;
 
     ScreenGui:Destroy()
 end
@@ -2767,7 +2778,7 @@ do
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderColor3 = Color3.new(0, 0, 0);
         BorderSizePixel = 0;
-        Position = UDim2.new(0.5, 0, 0, 18);
+        Position = UDim2.new(0.5, 0, 0, 38);
         Size = UDim2.new(0, 213, 0, 30);
         ZIndex = 200;
         Visible = false;
@@ -3610,6 +3621,15 @@ function Library:CreateWindow(...)
     local TransparencyCache = {};
     local Toggled = false;
     local Fading = false;
+    local BackgroundBlurEffect;
+    if Config.BackgroundBlur then
+        BackgroundBlurEffect = Instance.new('BlurEffect');
+        BackgroundBlurEffect.Name = 'LinoriaLibraryBackgroundBlur';
+        BackgroundBlurEffect.Size = 0;
+        BackgroundBlurEffect.Enabled = false;
+        BackgroundBlurEffect.Parent = Lighting;
+        Library.BackgroundBlurEffect = BackgroundBlurEffect;
+    end;
 
     function Library:Toggle()
         if Fading then
@@ -3624,6 +3644,21 @@ function Library:CreateWindow(...)
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true;
+            if BackgroundBlurEffect then
+                BackgroundBlurEffect.Enabled = true;
+            end;
+        end;
+
+        if BackgroundBlurEffect then
+            if Library.BackgroundBlurTween then
+                Library.BackgroundBlurTween:Cancel();
+            end;
+            Library.BackgroundBlurTween = TweenService:Create(
+                BackgroundBlurEffect,
+                TweenInfo.new(FadeTime, Enum.EasingStyle.Linear),
+                { Size = Toggled and 18 or 0 }
+            );
+            Library.BackgroundBlurTween:Play();
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
@@ -3663,6 +3698,9 @@ function Library:CreateWindow(...)
         task.wait(FadeTime);
 
         Outer.Visible = Toggled;
+        if BackgroundBlurEffect and not Toggled then
+            BackgroundBlurEffect.Enabled = false;
+        end;
 
         Fading = false;
     end
