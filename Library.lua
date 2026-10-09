@@ -548,6 +548,7 @@ do
         local DisplayFrame = Library:Create('Frame', {
             BackgroundColor3 = Color3.fromRGB(48, 49, 53);
             BorderSizePixel = 0;
+            ClipsDescendants = true;
             Size = UDim2.new(0, 32, 0, 18);
             ZIndex = 6;
             Parent = ToggleLabel;
@@ -556,10 +557,11 @@ do
 
         local ColorPreview = Library:Create('Frame', {
             BackgroundColor3 = ColorPicker.Value;
+            BackgroundTransparency = ColorPicker.Transparency;
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(1, 1);
             Size = UDim2.new(1, -2, 1, -2);
-            ZIndex = 7;
+            ZIndex = 8;
             Parent = DisplayFrame;
         });
         Library:AddCorner(ColorPreview, 4);
@@ -567,11 +569,12 @@ do
         -- Transparency image taken from https://github.com/matas3535/SplixPrivateDrawingLibrary/blob/main/Library.lua cus i'm lazy
         local CheckerFrame = Library:Create('ImageLabel', {
             BorderSizePixel = 0;
-            Size = UDim2.fromScale(1, 1);
-            ZIndex = 8;
+            Position = UDim2.fromOffset(1, 1);
+            Size = UDim2.new(1, -2, 1, -2);
+            ZIndex = 7;
             Image = 'http://www.roblox.com/asset/?id=12977615774';
             Visible = not not Info.Transparency;
-            Parent = ColorPreview;
+            Parent = DisplayFrame;
         });
         Library:AddCorner(CheckerFrame, 4);
 
