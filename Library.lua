@@ -3597,6 +3597,41 @@ function Library:CreateWindow(...)
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true;
+
+            task.spawn(function()
+                local Cursor = Drawing.new('Triangle');
+                Cursor.Thickness = 1;
+                Cursor.Filled = true;
+                Cursor.Visible = true;
+
+                local CursorOutline = Drawing.new('Triangle');
+                CursorOutline.Thickness = 1;
+                CursorOutline.Filled = false;
+                CursorOutline.Color = Color3.new(0, 0, 0);
+                CursorOutline.Visible = true;
+
+                local MouseIconWasEnabled = InputService.MouseIconEnabled;
+                InputService.MouseIconEnabled = false;
+
+                while Toggled and ScreenGui.Parent do
+                    local MousePosition = InputService:GetMouseLocation();
+
+                    Cursor.Color = Library.AccentColor;
+                    Cursor.PointA = MousePosition;
+                    Cursor.PointB = MousePosition + Vector2.new(16, 6);
+                    Cursor.PointC = MousePosition + Vector2.new(6, 16);
+
+                    CursorOutline.PointA = Cursor.PointA;
+                    CursorOutline.PointB = Cursor.PointB;
+                    CursorOutline.PointC = Cursor.PointC;
+
+                    RenderStepped:Wait();
+                end;
+
+                InputService.MouseIconEnabled = MouseIconWasEnabled;
+                Cursor:Remove();
+                CursorOutline:Remove();
+            end);
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
