@@ -132,6 +132,18 @@ function Library:GetIconAsset(IconName)
     return Asset.Url, Asset.ImageRectSize, Asset.ImageRectOffset;
 end;
 
+function Library:SetIconProvider(Provider)
+    assert(type(Provider) == 'table' and type(Provider.GetAsset) == 'function', 'SetIconProvider: provider must expose a GetAsset function.');
+    Library.IconProvider = Provider;
+
+    if Library.KeybindIcon then
+        local Image, RectSize, RectOffset = Library:GetIconAsset('keyboard');
+        Library.KeybindIcon.Image = Image;
+        Library.KeybindIcon.ImageRectSize = RectSize;
+        Library.KeybindIcon.ImageRectOffset = RectOffset;
+    end;
+end;
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -3160,18 +3172,15 @@ do
         BorderColor3 = 'OutlineColor';
     }, true);
 
-    local KeybindIconImage, KeybindIconRectSize, KeybindIconRectOffset = Library:GetIconAsset('keyboard');
     local KeybindIcon = Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
-        Image = KeybindIconImage;
-        ImageRectSize = KeybindIconRectSize;
-        ImageRectOffset = KeybindIconRectOffset;
         ImageColor3 = Library.FontColor;
         Position = UDim2.fromOffset(9, 7);
         Size = UDim2.fromOffset(14, 14);
         ZIndex = 104;
         Parent = KeybindInner;
     });
+    Library.KeybindIcon = KeybindIcon;
     Library:AddToRegistry(KeybindIcon, {
         ImageColor3 = 'FontColor';
     }, true);
