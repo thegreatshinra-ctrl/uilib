@@ -3295,7 +3295,7 @@ function Library:CreateWindow(...)
             AnchorPoint = Vector2.new(1, 0.5);
             BackgroundColor3 = BadgeBackground;
             BorderColor3 = IsPremium and Color3.fromRGB(105, 79, 38) or Color3.fromRGB(67, 72, 81);
-            Position = UDim2.new(1, -16, 0.5, 0);
+            Position = UDim2.new(1, -16, 0, 12);
             Size = UDim2.fromOffset(BadgeWidth, 19);
             ZIndex = 2;
             Parent = Inner;
