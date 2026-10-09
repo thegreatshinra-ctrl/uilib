@@ -1232,17 +1232,25 @@ do
 
             local YSize = 0
             local XSize = 0
+            local ActiveCount = 0
 
             for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA('TextLabel') and Label.Visible then
+                if Label:IsA('TextLabel') and Label ~= Library.KeybindEmptyLabel and Label.Visible then
+                    ActiveCount = ActiveCount + 1;
                     YSize = YSize + 18;
                     if (Label.TextBounds.X > XSize) then
                         XSize = Label.TextBounds.X
-                    end
+                    end;
                 end;
             end;
 
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+            Library.KeybindEmptyLabel.Visible = ActiveCount == 0;
+            Library.KeybindFrame.Size = UDim2.new(
+                0,
+                math.max(XSize + 24, 190),
+                0,
+                30 + math.max(YSize, 23) + 4
+            );
         end;
 
         function KeyPicker:GetState()
@@ -2844,44 +2852,73 @@ do
 
     local KeybindOuter = Library:Create('Frame', {
         AnchorPoint = Vector2.new(0, 0.5);
+        BackgroundColor3 = Color3.new(0, 0, 0);
         BorderColor3 = Color3.new(0, 0, 0);
         Position = UDim2.new(0, 10, 0.5, 0);
-        Size = UDim2.new(0, 210, 0, 20);
+        Size = UDim2.new(0, 190, 0, 57);
         Visible = false;
         ZIndex = 100;
         Parent = ScreenGui;
     });
+    Library:AddCorner(KeybindOuter, 13);
 
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
         BorderMode = Enum.BorderMode.Inset;
-        Size = UDim2.new(1, 0, 1, 0);
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 101;
         Parent = KeybindOuter;
     });
+    Library:AddCorner(KeybindInner, 12);
 
     Library:AddToRegistry(KeybindInner, {
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
     }, true);
 
-    local ColorFrame = Library:Create('Frame', {
-        BackgroundColor3 = Library.AccentColor;
+    local HeaderIcon = Library:Create('Frame', {
+        BackgroundColor3 = Library.OutlineColor;
         BorderSizePixel = 0;
-        Size = UDim2.new(1, 0, 0, 2);
+        Position = UDim2.fromOffset(10, 8);
+        Size = UDim2.fromOffset(13, 11);
+        ZIndex = 103;
+        Parent = KeybindInner;
+    });
+    Library:AddCorner(HeaderIcon, 3);
+
+    for Index = 0, 2 do
+        local KeyDot = Library:Create('Frame', {
+            BackgroundColor3 = Library.FontColor;
+            BackgroundTransparency = 0.15;
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(3 + Index * 3, 3);
+            Size = UDim2.fromOffset(2, 2);
+            ZIndex = 104;
+            Parent = HeaderIcon;
+        });
+        Library:AddCorner(KeyDot, 1);
+    end;
+
+    local ColorFrame = Library:Create('Frame', {
+        BackgroundColor3 = Library.OutlineColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 9, 0, 27);
+        Size = UDim2.new(1, -18, 0, 1);
         ZIndex = 102;
         Parent = KeybindInner;
     });
 
     Library:AddToRegistry(ColorFrame, {
-        BackgroundColor3 = 'AccentColor';
+        BackgroundColor3 = 'OutlineColor';
     }, true);
 
     local KeybindLabel = Library:CreateLabel({
-        Size = UDim2.new(1, 0, 0, 20);
-        Position = UDim2.fromOffset(5, 2),
+        Size = UDim2.new(1, -40, 0, 24);
+        Position = UDim2.fromOffset(29, 2),
         TextXAlignment = Enum.TextXAlignment.Left,
+        TextSize = 14;
 
         Text = 'Keybinds';
         ZIndex = 104;
@@ -2890,11 +2927,23 @@ do
 
     local KeybindContainer = Library:Create('Frame', {
         BackgroundTransparency = 1;
-        Size = UDim2.new(1, 0, 1, -20);
-        Position = UDim2.new(0, 0, 0, 20);
-        ZIndex = 1;
+        Size = UDim2.new(1, -10, 1, -32);
+        Position = UDim2.new(0, 10, 0, 31);
+        ZIndex = 103;
         Parent = KeybindInner;
     });
+
+    local KeybindEmptyLabel = Library:CreateLabel({
+        BackgroundTransparency = 1;
+        Size = UDim2.new(1, -2, 0, 21);
+        Text = 'No binds active';
+        TextColor3 = Color3.fromRGB(155, 155, 165);
+        TextSize = 13;
+        TextTransparency = 0.1;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 104;
+        Parent = KeybindContainer;
+    }, true);
 
     Library:Create('UIListLayout', {
         FillDirection = Enum.FillDirection.Vertical;
@@ -2909,7 +2958,7 @@ do
 
     Library.KeybindFrame = KeybindOuter;
     Library.KeybindContainer = KeybindContainer;
-    Library:MakeDraggable(KeybindOuter);
+    Library.KeybindEmptyLabel = KeybindEmptyLabel;
 end;
 
 function Library:SetWatermarkVisibility(Bool)
