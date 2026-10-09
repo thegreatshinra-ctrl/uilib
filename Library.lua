@@ -8,15 +8,36 @@ local TweenService = game:GetService('TweenService');
 local RenderStepped = RunService.RenderStepped;
 
 local function GetMousePosition()
-    return InputService:GetMouseLocation();
+    local MousePosition = InputService:GetMouseLocation();
+    local GuiInset = game:GetService('GuiService'):GetGuiInset();
+    return MousePosition - GuiInset;
 end;
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 
 local ScreenGuiName = 'LinoriaLibraryScreenGui';
-local PreviousScreenGui = CoreGui:FindFirstChild(ScreenGuiName);
-if PreviousScreenGui then
-    PreviousScreenGui:Destroy();
+local PreviousScreenGuis = {};
+for _, ExistingGui in next, CoreGui:GetChildren() do
+    if ExistingGui:IsA('ScreenGui') then
+        local IsLibraryGui = ExistingGui.Name == ScreenGuiName;
+
+        if not IsLibraryGui then
+            for _, Descendant in next, ExistingGui:GetDescendants() do
+                if Descendant.Name == 'TabFrame' then
+                    IsLibraryGui = true;
+                    break;
+                end;
+            end;
+        end;
+
+        if IsLibraryGui then
+            table.insert(PreviousScreenGuis, ExistingGui);
+        end;
+    end;
+end;
+
+for _, ExistingGui in next, PreviousScreenGuis do
+    ExistingGui:Destroy();
 end;
 
 local ScreenGui = Instance.new('ScreenGui');
@@ -24,8 +45,9 @@ ScreenGui.Name = ScreenGuiName;
 ProtectGui(ScreenGui);
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
-ScreenGui.IgnoreGuiInset = true;
+ScreenGui.IgnoreGuiInset = false;
 ScreenGui.Parent = CoreGui;
+InputService.MouseIconEnabled = true;
 
 local Toggles = {};
 local Options = {};
@@ -3575,45 +3597,6 @@ function Library:CreateWindow(...)
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true;
-
-            task.spawn(function()
-                -- TODO: add cursor fade?
-                local State = InputService.MouseIconEnabled;
-
-                local Cursor = Drawing.new('Triangle');
-                Cursor.Thickness = 1;
-                Cursor.Filled = true;
-                Cursor.Visible = true;
-
-                local CursorOutline = Drawing.new('Triangle');
-                CursorOutline.Thickness = 1;
-                CursorOutline.Filled = false;
-                CursorOutline.Color = Color3.new(0, 0, 0);
-                CursorOutline.Visible = true;
-
-                while Toggled and ScreenGui.Parent do
-                    InputService.MouseIconEnabled = false;
-
-                    local mPos = GetMousePosition();
-
-                    Cursor.Color = Library.AccentColor;
-
-                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y + 2);
-                    Cursor.PointB = Vector2.new(mPos.X + 16, mPos.Y + 6);
-                    Cursor.PointC = Vector2.new(mPos.X + 6, mPos.Y + 16);
-
-                    CursorOutline.PointA = Cursor.PointA;
-                    CursorOutline.PointB = Cursor.PointB;
-                    CursorOutline.PointC = Cursor.PointC;
-
-                    RenderStepped:Wait();
-                end;
-
-                InputService.MouseIconEnabled = State;
-
-                Cursor:Remove();
-                CursorOutline:Remove();
-            end);
         end;
 
         for _, Desc in next, Outer:GetDescendants() do
