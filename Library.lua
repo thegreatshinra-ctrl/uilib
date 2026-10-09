@@ -82,6 +82,7 @@ local Library = {
     DependencyBoxes = {};
 
     Signals = {};
+    GlowTweens = {};
     ScreenGui = ScreenGui;
 };
 
@@ -90,6 +91,31 @@ function Library:AddCorner(GuiObject, Radius)
     Corner.CornerRadius = UDim.new(0, Radius or 6);
     Corner.Parent = GuiObject;
     return Corner;
+end;
+
+function Library:AddOuterGlow(GuiObject)
+    for Index, Settings in ipairs({
+        { Thickness = 10, MinTransparency = 0.9, MaxTransparency = 0.96, Duration = 1.4 },
+        { Thickness = 5, MinTransparency = 0.82, MaxTransparency = 0.94, Duration = 1.1 },
+    }) do
+        local GlowStroke = Instance.new('UIStroke');
+        GlowStroke.Color = Library.AccentColor;
+        GlowStroke.Thickness = Settings.Thickness;
+        GlowStroke.Transparency = Settings.MaxTransparency;
+        GlowStroke.Parent = GuiObject;
+        GlowStroke:SetAttribute('LibraryGlow', true);
+        Library:AddToRegistry(GlowStroke, {
+            Color = 'AccentColor';
+        });
+
+        local GlowTween = TweenService:Create(
+            GlowStroke,
+            TweenInfo.new(Settings.Duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+            { Transparency = Settings.MinTransparency }
+        );
+        GlowTween:Play();
+        table.insert(Library.GlowTweens, GlowTween);
+    end;
 end;
 
 function Library:GetIconAsset(IconName)
@@ -534,6 +560,11 @@ function Library:Unload()
         Library.BackgroundBlurEffect:Destroy();
         Library.BackgroundBlurEffect = nil;
     end;
+
+    for _, GlowTween in ipairs(Library.GlowTweens) do
+        GlowTween:Cancel();
+    end;
+    table.clear(Library.GlowTweens);
 
     InputService.MouseIconEnabled = PreviousMouseIconEnabled;
     ScreenGui:Destroy()
@@ -3043,6 +3074,7 @@ do
         Parent = ScreenGui;
     });
     Library:AddCorner(WatermarkOuter, 14);
+    Library:AddOuterGlow(WatermarkOuter);
 
     local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -3430,6 +3462,7 @@ function Library:CreateWindow(...)
         Parent = ScreenGui;
     });
     Library:AddCorner(Outer, 14);
+    Library:AddOuterGlow(Outer);
 
     local WindowScale = Instance.new('UIScale');
     WindowScale.Scale = 1;
@@ -4274,6 +4307,10 @@ function Library:CreateWindow(...)
             end;
 
             for _, Prop in next, Properties do
+                if Desc:GetAttribute('LibraryGlow') then
+                    continue;
+                end;
+
                 if not Cache[Prop] then
                     Cache[Prop] = Desc[Prop];
                 end;
