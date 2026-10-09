@@ -4068,46 +4068,107 @@ function Library:CreateWindow(...)
     local BackgroundBlurEffect;
     local CustomCursorEnabled = Config.CustomCursor ~= false;
     local CustomCursor;
+    local CursorTrail = {};
+    local CursorHistory = {};
+    local CursorHistoryCount = 0;
     if CustomCursorEnabled then
+        local CursorSize = Vector2.new(24, 26);
         CustomCursor = Library:Create('Frame', {
-            AnchorPoint = Vector2.new(0.5, 0.5);
-            BackgroundColor3 = Library.BackgroundColor;
-            BackgroundTransparency = 0.15;
-            BorderSizePixel = 0;
+            BackgroundTransparency = 1;
             Position = UDim2.fromOffset(-100, -100);
-            Size = UDim2.fromOffset(14, 14);
+            Size = UDim2.fromOffset(CursorSize.X, CursorSize.Y);
             Visible = false;
             ZIndex = 300;
             Parent = ScreenGui;
         });
-        Library:AddCorner(CustomCursor, 7);
-        Library:Create('UIStroke', {
-            Color = Library.FontColor;
-            Thickness = 1;
-            Parent = CustomCursor;
-        });
-        Library:AddToRegistry(CustomCursor, {
-            BackgroundColor3 = 'BackgroundColor';
-        });
 
-        local CursorDot = Library:Create('Frame', {
-            AnchorPoint = Vector2.new(0.5, 0.5);
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.fromScale(0.5, 0.5);
-            Size = UDim2.fromOffset(4, 4);
-            ZIndex = 301;
-            Parent = CustomCursor;
-        });
-        Library:AddCorner(CursorDot, 2);
-        Library:AddToRegistry(CursorDot, {
-            BackgroundColor3 = 'AccentColor';
-        });
+        local CursorEdges = {
+            { Vector2.new(1, 1), Vector2.new(13, 10) },
+            { Vector2.new(13, 10), Vector2.new(7, 13) },
+            { Vector2.new(7, 13), Vector2.new(12, 22) },
+            { Vector2.new(12, 22), Vector2.new(9, 24) },
+            { Vector2.new(9, 24), Vector2.new(4, 14) },
+            { Vector2.new(4, 14), Vector2.new(1, 1) },
+        };
 
-        Library:GiveSignal(RenderStepped:Connect(function()
+        for _, Edge in ipairs(CursorEdges) do
+            local Start = Edge[1];
+            local Finish = Edge[2];
+            local Difference = Finish - Start;
+            local Length = Difference.Magnitude;
+            local Midpoint = (Start + Finish) / 2;
+            local Rotation = math.deg(math.atan2(Difference.Y, Difference.X));
+
+            local EdgeShadow = Library:Create('Frame', {
+                AnchorPoint = Vector2.new(0.5, 0.5);
+                BackgroundColor3 = Library.BackgroundColor;
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(Midpoint.X, Midpoint.Y);
+                Rotation = Rotation;
+                Size = UDim2.fromOffset(Length + 1, 4);
+                ZIndex = 301;
+                Parent = CustomCursor;
+            });
+            Library:AddToRegistry(EdgeShadow, {
+                BackgroundColor3 = 'BackgroundColor';
+            });
+
+            local EdgeHighlight = Library:Create('Frame', {
+                AnchorPoint = Vector2.new(0.5, 0.5);
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(Midpoint.X, Midpoint.Y);
+                Rotation = Rotation;
+                Size = UDim2.fromOffset(Length, 1.5);
+                ZIndex = 302;
+                Parent = CustomCursor;
+            });
+            Library:AddToRegistry(EdgeHighlight, {
+                BackgroundColor3 = 'AccentColor';
+            });
+        end;
+
+        local TrailSizes = { 8, 7, 6, 5, 4 };
+        for Index, TrailSize in ipairs(TrailSizes) do
+            CursorHistory[Index] = Vector2.new(-100, -100);
+            local TrailDot = Library:Create('Frame', {
+                AnchorPoint = Vector2.new(0.5, 0.5);
+                BackgroundColor3 = Library.AccentColor;
+                BackgroundTransparency = 0.45 + Index * 0.09;
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(-100, -100);
+                Size = UDim2.fromOffset(TrailSize, TrailSize);
+                Visible = false;
+                ZIndex = 299;
+                Parent = ScreenGui;
+            });
+            Library:AddCorner(TrailDot, TrailSize / 2);
+            Library:AddToRegistry(TrailDot, {
+                BackgroundColor3 = 'AccentColor';
+            });
+            CursorTrail[Index] = TrailDot;
+        end;
+
+        local TrailAccumulator = 0;
+
+        Library:GiveSignal(RenderStepped:Connect(function(DeltaTime)
             if CustomCursor.Visible then
                 local MousePosition = GetMousePosition();
-                CustomCursor.Position = UDim2.fromOffset(MousePosition.X, MousePosition.Y);
+                CustomCursor.Position = UDim2.fromOffset(MousePosition.X - 1, MousePosition.Y - 1);
+                TrailAccumulator = TrailAccumulator + DeltaTime;
+                if TrailAccumulator >= 0.025 then
+                    TrailAccumulator = 0;
+                    for Index = #CursorHistory, 2, -1 do
+                        CursorHistory[Index] = CursorHistory[Index - 1];
+                    end;
+                    CursorHistory[1] = MousePosition;
+                    CursorHistoryCount = math.min(CursorHistoryCount + 1, #CursorHistory);
+                end;
+
+                for Index, TrailDot in ipairs(CursorTrail) do
+                    TrailDot.Position = UDim2.fromOffset(CursorHistory[Index].X, CursorHistory[Index].Y);
+                    TrailDot.Visible = Index <= CursorHistoryCount;
+                end;
             end;
         end));
     end;
@@ -4133,8 +4194,17 @@ function Library:CreateWindow(...)
         if CustomCursor then
             CustomCursor.Visible = Toggled;
             if Toggled then
+                local MousePosition = GetMousePosition();
+                CustomCursor.Position = UDim2.fromOffset(MousePosition.X - 1, MousePosition.Y - 1);
+                CursorHistoryCount = 0;
+                for _, TrailDot in ipairs(CursorTrail) do
+                    TrailDot.Visible = false;
+                end;
                 InputService.MouseIconEnabled = false;
             else
+                for _, TrailDot in ipairs(CursorTrail) do
+                    TrailDot.Visible = false;
+                end;
                 InputService.MouseIconEnabled = PreviousMouseIconEnabled;
             end;
         end;
