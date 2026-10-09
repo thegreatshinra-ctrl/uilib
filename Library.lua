@@ -4066,6 +4066,44 @@ function Library:CreateWindow(...)
     local Fading = false;
     local WindowScaleTween;
     local BackgroundBlurEffect;
+    local MouseTiltEnabled = Config.MouseTilt == true;
+    if MouseTiltEnabled then
+        local TiltRotation = Outer.Rotation;
+        local AppliedPositionOffset = Vector2.zero;
+        local AppliedRotation = 0;
+        local MaxTiltDegrees = 3;
+        local MaxParallaxPixels = 7;
+        local TiltSpeed = 12;
+
+        Library:GiveSignal(RenderStepped:Connect(function(DeltaTime)
+            local Position = Outer.Position;
+            local BaseOffsetX = Position.X.Offset - AppliedPositionOffset.X;
+            local BaseOffsetY = Position.Y.Offset - AppliedPositionOffset.Y;
+            local TargetRotation = 0;
+            local TargetOffset = Vector2.zero;
+
+            if Toggled and Outer.Visible then
+                local MousePosition = GetMousePosition();
+                local ViewportSize = ScreenGui.AbsoluteSize;
+                local NormalizedX = math.clamp((MousePosition.X / math.max(ViewportSize.X, 1) - 0.5) * 2, -1, 1);
+                local NormalizedY = math.clamp((MousePosition.Y / math.max(ViewportSize.Y, 1) - 0.5) * 2, -1, 1);
+                TargetRotation = NormalizedX * MaxTiltDegrees;
+                TargetOffset = Vector2.new(-NormalizedX * MaxParallaxPixels, -NormalizedY * MaxParallaxPixels);
+            end;
+
+            local Blend = 1 - math.exp(-TiltSpeed * DeltaTime);
+            AppliedRotation = AppliedRotation + (TargetRotation - AppliedRotation) * Blend;
+            AppliedPositionOffset = AppliedPositionOffset:Lerp(TargetOffset, Blend);
+            Outer.Rotation = TiltRotation + AppliedRotation;
+            Outer.Position = UDim2.new(
+                Position.X.Scale,
+                BaseOffsetX + AppliedPositionOffset.X,
+                Position.Y.Scale,
+                BaseOffsetY + AppliedPositionOffset.Y
+            );
+        end));
+    end;
+
     local CustomCursorEnabled = Config.CustomCursor ~= false;
     local CustomCursor;
     local CursorTrail = {};
