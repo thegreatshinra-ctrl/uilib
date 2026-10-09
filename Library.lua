@@ -3670,6 +3670,7 @@ function Library:CreateWindow(...)
             BottomImage = '';
             TopImage = '';
             ScrollBarThickness = 0;
+            ScrollBarImageTransparency = 1;
             ZIndex = 2;
             Parent = TabFrame;
         });
@@ -3683,6 +3684,7 @@ function Library:CreateWindow(...)
             BottomImage = '';
             TopImage = '';
             ScrollBarThickness = 0;
+            ScrollBarImageTransparency = 1;
             ZIndex = 2;
             Parent = TabFrame;
         });
