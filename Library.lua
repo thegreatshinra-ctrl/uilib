@@ -3537,7 +3537,7 @@ function Library:CreateWindow(...)
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.new(0, 15, 0.5, -9);
+        Position = UDim2.fromOffset(15, 7);
         Size = UDim2.fromOffset(18, 18);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 3;
@@ -3551,7 +3551,7 @@ function Library:CreateWindow(...)
         TextXAlignment = Enum.TextXAlignment.Left;
         TextYAlignment = Enum.TextYAlignment.Center;
         ZIndex = 3;
-        Parent = Inner;
+        Parent = Header;
     });
 
     if type(Config.Subtitle) == 'string' and Config.Subtitle ~= '' then
@@ -3559,7 +3559,7 @@ function Library:CreateWindow(...)
         local SubtitleWidth = Library:GetTextBounds(Config.Subtitle, Library.Font, 14);
 
         Library:CreateLabel({
-            Position = UDim2.new(0, HeaderLeftPadding + TitleWidth + 8, 0, 0);
+            Position = UDim2.fromOffset(HeaderLeftPadding + TitleWidth + 8, 0);
             Size = UDim2.new(0, SubtitleWidth, 0, 32);
             Text = Config.Subtitle;
             TextSize = 14;
@@ -3567,7 +3567,7 @@ function Library:CreateWindow(...)
             TextXAlignment = Enum.TextXAlignment.Left;
             TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 3;
-            Parent = Inner;
+            Parent = Header;
         });
     end;
 
