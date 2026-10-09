@@ -46,6 +46,13 @@ local Library = {
     ScreenGui = ScreenGui;
 };
 
+function Library:AddCorner(GuiObject, Radius)
+    local Corner = Instance.new('UICorner');
+    Corner.CornerRadius = UDim.new(0, Radius or 4);
+    Corner.Parent = GuiObject;
+    return Corner;
+end;
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -127,17 +134,6 @@ function Library:Create(Class, Properties)
 
     for Property, Value in next, Properties do
         _Instance[Property] = Value;
-    end;
-
-    if _Instance:IsA('Frame')
-        or _Instance:IsA('TextButton')
-        or _Instance:IsA('ImageButton')
-        or _Instance:IsA('TextBox')
-        or _Instance:IsA('ScrollingFrame') then
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 4);
-            Parent = _Instance;
-        });
     end;
 
     return _Instance;
@@ -1847,6 +1843,7 @@ do
             ZIndex = 5;
             Parent = Container;
         });
+        Library:AddCorner(ToggleOuter);
 
         Library:AddToRegistry(ToggleOuter, {
             BorderColor3 = 'Black';
@@ -1860,6 +1857,7 @@ do
             ZIndex = 6;
             Parent = ToggleOuter;
         });
+        Library:AddCorner(ToggleInner);
 
         local ToggleGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new(Color3.new(1, 1, 1));
@@ -2013,6 +2011,7 @@ do
             ZIndex = 5;
             Parent = Container;
         });
+        Library:AddCorner(SliderOuter);
 
         Library:AddToRegistry(SliderOuter, {
             BorderColor3 = 'Black';
@@ -2026,6 +2025,7 @@ do
             ZIndex = 6;
             Parent = SliderOuter;
         });
+        Library:AddCorner(SliderInner);
 
         Library:AddToRegistry(SliderInner, {
             BackgroundColor3 = 'MainColor';
@@ -2039,6 +2039,7 @@ do
             ZIndex = 7;
             Parent = SliderInner;
         });
+        Library:AddCorner(Fill);
 
         Library:Create('UIGradient', {
             Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175));
@@ -2974,6 +2975,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = ScreenGui;
     });
+    Library:AddCorner(Outer);
 
     Library:MakeDraggable(Outer, 25);
 
@@ -2986,6 +2988,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     });
+    Library:AddCorner(Inner);
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
@@ -3025,6 +3028,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Inner;
     });
+    Library:AddCorner(MainSectionOuter);
 
     Library:AddToRegistry(MainSectionOuter, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3040,6 +3044,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = MainSectionOuter;
     });
+    Library:AddCorner(MainSectionInner);
 
     Library:AddToRegistry(MainSectionInner, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3068,6 +3073,7 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
+    Library:AddCorner(TabContainer);
     
 
     Library:AddToRegistry(TabContainer, {
@@ -3214,6 +3220,7 @@ function Library:CreateWindow(...)
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             });
+            Library:AddCorner(BoxOuter);
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -3229,6 +3236,7 @@ function Library:CreateWindow(...)
                 ZIndex = 4;
                 Parent = BoxOuter;
             });
+            Library:AddCorner(BoxInner);
 
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
