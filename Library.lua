@@ -67,11 +67,11 @@ local Library = {
 
     HudRegistry = {};
 
-    FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(28, 28, 28);
-    BackgroundColor = Color3.fromRGB(20, 20, 20);
+    FontColor = Color3.fromRGB(238, 238, 238);
+    MainColor = Color3.fromRGB(17, 17, 17);
+    BackgroundColor = Color3.fromRGB(10, 10, 10);
     AccentColor = Color3.fromRGB(255, 255, 255);
-    OutlineColor = Color3.fromRGB(50, 50, 50);
+    OutlineColor = Color3.fromRGB(34, 34, 34);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
@@ -237,27 +237,33 @@ function Library:MakeDraggable(Instance, Cutoff)
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
-    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14);
+    local Padding = 10;
+    local MaxWidth = 280;
+    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14, Vector2.new(MaxWidth, math.huge));
+    local TooltipWidth = math.min(MaxWidth, X) + Padding * 2;
+    local TooltipHeight = Y + Padding * 2;
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor,
         BorderColor3 = Library.OutlineColor,
-
-        Size = UDim2.fromOffset(X + 5, Y + 4),
+        BorderMode = Enum.BorderMode.Inset;
+        Size = UDim2.fromOffset(TooltipWidth, TooltipHeight);
         ZIndex = 100,
         Parent = Library.ScreenGui,
-
         Visible = false,
     })
+    Library:AddCorner(Tooltip, 7);
 
     local Label = Library:CreateLabel({
-        Position = UDim2.fromOffset(3, 1),
-        Size = UDim2.fromOffset(X, Y);
+        BackgroundTransparency = 1;
+        Position = UDim2.fromOffset(Padding, Padding);
+        Size = UDim2.new(1, -Padding * 2, 1, -Padding * 2);
         TextSize = 14;
         Text = InfoStr,
         TextColor3 = Library.FontColor,
         TextXAlignment = Enum.TextXAlignment.Left;
+        TextYAlignment = Enum.TextYAlignment.Center;
+        TextWrapped = true;
         ZIndex = Tooltip.ZIndex + 1,
-
         Parent = Tooltip;
     });
 
@@ -279,14 +285,20 @@ function Library:AddToolTip(InfoStr, HoverInstance)
 
         IsHovering = true
 
-        local MousePosition = GetMousePosition()
-        Tooltip.Position = UDim2.fromOffset(MousePosition.X + 15, MousePosition.Y + 12)
+        local function PositionTooltip()
+            local MousePosition = GetMousePosition()
+            local ViewportSize = Library.ScreenGui.AbsoluteSize
+            local XPosition = math.clamp(MousePosition.X + 14, 8, math.max(8, ViewportSize.X - TooltipWidth - 8))
+            local YPosition = math.clamp(MousePosition.Y + 12, 8, math.max(8, ViewportSize.Y - TooltipHeight - 8))
+            Tooltip.Position = UDim2.fromOffset(XPosition, YPosition)
+        end
+
+        PositionTooltip()
         Tooltip.Visible = true
 
         while IsHovering do
             RunService.Heartbeat:Wait()
-            MousePosition = GetMousePosition()
-            Tooltip.Position = UDim2.fromOffset(MousePosition.X + 15, MousePosition.Y + 12)
+            PositionTooltip()
         end
     end)
 
@@ -3463,7 +3475,7 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0, 8, 0, 32);
-        Size = UDim2.new(1, -16, 1, -40);
+        Size = UDim2.new(1, -16, 1, -62);
         ZIndex = 1;
         Parent = Inner;
     });
@@ -3520,55 +3532,87 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
+    local FooterLeft = Config.FooterLeft or 'Tour UI';
+    local FooterRight = Config.FooterRight or ('Build: ' .. os.date('%b. ') .. tonumber(os.date('%d')) .. os.date(', %Y'));
+    local FooterLeftLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 12, 1, -24);
+        Size = UDim2.new(0.5, -16, 0, 16);
+        Text = FooterLeft;
+        TextColor3 = Color3.fromRGB(145, 145, 145);
+        TextSize = 12;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 2;
+        Parent = Inner;
+    });
+    local FooterRightLabel = Library:CreateLabel({
+        Position = UDim2.new(0.5, 4, 1, -24);
+        Size = UDim2.new(0.5, -16, 0, 16);
+        Text = FooterRight;
+        TextColor3 = Color3.fromRGB(145, 145, 145);
+        TextSize = 12;
+        TextXAlignment = Enum.TextXAlignment.Right;
+        ZIndex = 2;
+        Parent = Inner;
+    });
+
     local HasSelectedTab = false;
 
     function Window:SetWindowTitle(Title)
         WindowLabel.Text = Title;
     end;
 
-    function Window:AddTab(Name)
+    function Window:AddTab(Name, Icon)
         local Tab = {
             Groupboxes = {};
             Tabboxes = {};
         };
 
-        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
+        local HasIcon = Icon ~= nil and Icon ~= '';
+        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 14) + (HasIcon and 34 or 16);
 
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(0, TabButtonWidth, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
         });
-        Library:AddCorner(TabButton);
+        Library:AddCorner(TabButton, 10);
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
-            BorderColor3 = 'OutlineColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
-            Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(1, 0, 1, -1);
+            Position = UDim2.new(0, HasIcon and 25 or 8, 0, 0);
+            Size = UDim2.new(1, HasIcon and -29 or -16, 1, 0);
+            TextSize = 14;
             Text = Name;
+            TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 1;
             Parent = TabButton;
         });
 
-        local Blocker = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, 0);
-            Size = UDim2.new(1, 0, 0, 1);
-            BackgroundTransparency = 1;
-            ZIndex = 3;
-            Parent = TabButton;
-        });
+        if HasIcon then
+            assert(type(Icon) == 'string' or type(Icon) == 'number', 'AddTab: `Icon` must be an asset ID or image URI.');
+            local IconImage = tostring(Icon);
+            if type(Icon) == 'number' or IconImage:match('^%d+$') then
+                IconImage = 'rbxassetid://' .. IconImage;
+            end;
 
-        Library:AddToRegistry(Blocker, {
-            BackgroundColor3 = 'MainColor';
-        });
+            local TabIcon = Library:Create('ImageLabel', {
+                BackgroundTransparency = 1;
+                Image = IconImage;
+                ImageColor3 = Library.FontColor;
+                Position = UDim2.new(0, 8, 0.5, -6);
+                Size = UDim2.fromOffset(12, 12);
+                ScaleType = Enum.ScaleType.Fit;
+                ZIndex = 2;
+                Parent = TabButton;
+            });
+            Library:AddToRegistry(TabIcon, { ImageColor3 = 'FontColor' });
+        end;
 
         local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
@@ -3633,14 +3677,12 @@ function Library:CreateWindow(...)
                 Tab:HideTab();
             end;
 
-            Blocker.BackgroundTransparency = 0;
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
             TabFrame.Visible = true;
         end;
 
         function Tab:HideTab()
-            Blocker.BackgroundTransparency = 1;
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
             TabFrame.Visible = false;
