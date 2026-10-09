@@ -67,7 +67,7 @@ local Library = {
 
     HudRegistry = {};
 
-    FontColor = Color3.fromRGB(232, 232, 234);
+    FontColor = Color3.fromRGB(174, 176, 181);
     MainColor = Color3.fromRGB(12, 13, 15);
     BackgroundColor = Color3.fromRGB(7, 8, 10);
     AccentColor = Color3.fromRGB(255, 255, 255);
@@ -3725,17 +3725,17 @@ function Library:CreateWindow(...)
 
             local GroupboxIcon = Info.Icon;
             local HasIcon = GroupboxIcon ~= nil and GroupboxIcon ~= '';
-            local HeaderTextWidth = HasIcon and Library:GetTextBounds(Info.Name, Library.Font, 14, Vector2.new(1000, 17)) or nil;
-            local HeaderStart = HasIcon and -((HeaderTextWidth + 23) / 2) or nil;
             local GroupboxLabel = Library:CreateLabel({
-                Size = HasIcon and UDim2.fromOffset(HeaderTextWidth, 17) or UDim2.new(1, -16, 0, 17);
-                Position = HasIcon and UDim2.new(0.5, HeaderStart + 23, 0, 2) or UDim2.new(0, 8, 0, 2);
+                Size = UDim2.new(1, HasIcon and -40 or -16, 0, 18);
+                Position = UDim2.new(0, HasIcon and 34 or 8, 0, 2);
                 TextSize = 14;
+                TextColor3 = Color3.fromRGB(255, 255, 255);
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
+            Library.RegistryMap[GroupboxLabel].Properties.TextColor3 = Color3.fromRGB(255, 255, 255);
 
             if HasIcon then
                 local IconImage, IconRectSize, IconRectOffset = Library:GetIconAsset(GroupboxIcon);
@@ -3744,14 +3744,13 @@ function Library:CreateWindow(...)
                     Image = IconImage;
                     ImageRectSize = IconRectSize;
                     ImageRectOffset = IconRectOffset;
-                    ImageColor3 = Library.FontColor;
-                    Position = UDim2.new(0.5, HeaderStart, 0, 3);
-                    Size = UDim2.fromOffset(14, 14);
+                    ImageColor3 = Color3.fromRGB(255, 255, 255);
+                    Position = UDim2.new(0, 8, 0, 3);
+                    Size = UDim2.fromOffset(18, 18);
                     ScaleType = Enum.ScaleType.Fit;
                     ZIndex = 5;
                     Parent = BoxInner;
                 });
-                Library:AddToRegistry(IconLabel, { ImageColor3 = 'FontColor' });
             end;
 
             local Container = Library:Create('Frame', {
