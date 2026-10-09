@@ -3536,7 +3536,7 @@ function Library:CreateWindow(...)
     local HeaderLeftPadding = 40;
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
-        Image = 'rbxassetid://72635809476881';
+        Image = Config.TitleIcon or 'rbxassetid://72635809476881';
         Position = UDim2.new(0, 15, 0.5, -9);
         Size = UDim2.fromOffset(18, 18);
         ScaleType = Enum.ScaleType.Fit;
