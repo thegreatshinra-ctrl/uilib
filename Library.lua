@@ -3262,9 +3262,10 @@ function Library:CreateWindow(...)
     local HeaderLeftPadding = 17;
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, HeaderLeftPadding, 0, 0);
-        Size = UDim2.new(0, 0, 0, 25);
+        Size = UDim2.new(0, 0, 0, 32);
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
+        TextYAlignment = Enum.TextYAlignment.Center;
         ZIndex = 1;
         Parent = Inner;
     });
@@ -3275,27 +3276,28 @@ function Library:CreateWindow(...)
 
         Library:CreateLabel({
             Position = UDim2.new(0, HeaderLeftPadding + TitleWidth + 8, 0, 0);
-            Size = UDim2.new(0, SubtitleWidth, 0, 25);
+            Size = UDim2.new(0, SubtitleWidth, 0, 32);
             Text = Config.Subtitle;
             TextSize = 14;
             TextTransparency = 0.45;
             TextXAlignment = Enum.TextXAlignment.Left;
+            TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 1;
             Parent = Inner;
         });
     end;
 
     if Config.Status then
-        local IsPremium = Config.Status == 'Premium';
-        local StatusColor = IsPremium and Color3.fromRGB(255, 205, 112) or Color3.fromRGB(190, 198, 210);
-        local BadgeBackground = IsPremium and Color3.fromRGB(58, 45, 25) or Color3.fromRGB(43, 46, 52);
+        local StatusColor = Color3.fromRGB(245, 245, 248);
+        local BadgeBackground = Color3.fromRGB(43, 46, 52);
+        local BadgeOutline = Color3.fromRGB(67, 72, 81);
         local StatusTextWidth = Library:GetTextBounds(Config.Status, Library.Font, 12);
         local BadgeWidth = StatusTextWidth + 28;
         local StatusBadge = Library:Create('Frame', {
             AnchorPoint = Vector2.new(1, 0.5);
             BackgroundColor3 = BadgeBackground;
-            BorderColor3 = IsPremium and Color3.fromRGB(105, 79, 38) or Color3.fromRGB(67, 72, 81);
-            Position = UDim2.new(1, -16, 0, 12);
+            BorderColor3 = BadgeOutline;
+            Position = UDim2.new(1, -16, 0, 16);
             Size = UDim2.fromOffset(BadgeWidth, 19);
             ZIndex = 2;
             Parent = Inner;
@@ -3328,8 +3330,8 @@ function Library:CreateWindow(...)
     local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, 25);
-        Size = UDim2.new(1, -16, 1, -33);
+        Position = UDim2.new(0, 8, 0, 32);
+        Size = UDim2.new(1, -16, 1, -40);
         ZIndex = 1;
         Parent = Inner;
     });
