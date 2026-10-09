@@ -4106,9 +4106,6 @@ function Library:CreateWindow(...)
 
     local CustomCursorEnabled = Config.CustomCursor ~= false;
     local CustomCursor;
-    local CursorTrail = {};
-    local CursorHistory = {};
-    local CursorHistoryCount = 0;
     if CustomCursorEnabled then
         CustomCursor = Library:Create('Frame', {
             AnchorPoint = Vector2.new(0.5, 0.5);
@@ -4130,41 +4127,10 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'AccentColor';
         });
 
-        local TrailSizes = { 8, 7, 6, 5, 4 };
-        for Index, TrailSize in ipairs(TrailSizes) do
-            CursorHistory[Index] = Vector2.new(-100, -100);
-            local TrailDot = Library:Create('Frame', {
-                AnchorPoint = Vector2.new(0.5, 0.5);
-                BackgroundColor3 = Library.AccentColor;
-                BackgroundTransparency = 0.45 + Index * 0.09;
-                BorderSizePixel = 0;
-                Position = UDim2.fromOffset(-100, -100);
-                Size = UDim2.fromOffset(TrailSize, TrailSize);
-                Visible = false;
-                ZIndex = 299;
-                Parent = ScreenGui;
-            });
-            Library:AddCorner(TrailDot, TrailSize / 2);
-            Library:AddToRegistry(TrailDot, {
-                BackgroundColor3 = 'AccentColor';
-            });
-            CursorTrail[Index] = TrailDot;
-        end;
-
         Library:GiveSignal(RenderStepped:Connect(function()
             if CustomCursor.Visible then
                 local MousePosition = GetMousePosition();
                 CustomCursor.Position = UDim2.fromOffset(MousePosition.X, MousePosition.Y);
-                for Index = #CursorHistory, 2, -1 do
-                    CursorHistory[Index] = CursorHistory[Index - 1];
-                end;
-                CursorHistory[1] = MousePosition;
-                CursorHistoryCount = math.min(CursorHistoryCount + 1, #CursorHistory);
-
-                for Index, TrailDot in ipairs(CursorTrail) do
-                    TrailDot.Position = UDim2.fromOffset(CursorHistory[Index].X, CursorHistory[Index].Y);
-                    TrailDot.Visible = Index <= CursorHistoryCount;
-                end;
             end;
         end));
     end;
@@ -4192,15 +4158,8 @@ function Library:CreateWindow(...)
             if Toggled then
                 local MousePosition = GetMousePosition();
                 CustomCursor.Position = UDim2.fromOffset(MousePosition.X, MousePosition.Y);
-                CursorHistoryCount = 0;
-                for _, TrailDot in ipairs(CursorTrail) do
-                    TrailDot.Visible = false;
-                end;
                 InputService.MouseIconEnabled = false;
             else
-                for _, TrailDot in ipairs(CursorTrail) do
-                    TrailDot.Visible = false;
-                end;
                 InputService.MouseIconEnabled = PreviousMouseIconEnabled;
             end;
         end;
