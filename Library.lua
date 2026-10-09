@@ -3687,7 +3687,7 @@ function Library:CreateWindow(...)
             local HasIcon = GroupboxIcon ~= nil and GroupboxIcon ~= '';
             local GroupboxLabel = Library:CreateLabel({
                 Size = UDim2.new(1, HasIcon and -34 or -16, 0, 17);
-                Position = UDim2.new(0, HasIcon and 26 or 8, 0, 4);
+                Position = UDim2.new(0, HasIcon and 26 or 8, 0, 2);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
@@ -3717,8 +3717,8 @@ function Library:CreateWindow(...)
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
-                Position = UDim2.new(0, 7, 0, 23);
-                Size = UDim2.new(1, -7, 1, -23);
+                Position = UDim2.new(0, 7, 0, 28);
+                Size = UDim2.new(1, -7, 1, -28);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
@@ -3738,7 +3738,7 @@ function Library:CreateWindow(...)
                     end;
                 end;
 
-                BoxOuter.Size = UDim2.new(1, 0, 0, 23 + Size + 2 + 2);
+                BoxOuter.Size = UDim2.new(1, 0, 0, 28 + Size + 2 + 2);
             end;
 
             Groupbox.Container = Container;
