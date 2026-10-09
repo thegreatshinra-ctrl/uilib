@@ -3515,7 +3515,7 @@ function Library:CreateWindow(...)
         end);
 
         -- This was the first tab added, so we show it by default.
-        if #TabContainer:GetChildren() == 1 then
+        if next(Window.Tabs) == nil then
             Tab:ShowTab();
         end;
 
