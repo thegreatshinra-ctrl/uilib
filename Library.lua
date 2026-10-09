@@ -3727,9 +3727,11 @@ function Library:CreateWindow(...)
 
             local GroupboxIcon = Info.Icon;
             local HasIcon = GroupboxIcon ~= nil and GroupboxIcon ~= '';
+            local HeaderTextWidth = HasIcon and Library:GetTextBounds(Info.Name, Library.Font, 14, Vector2.new(1000, 17)) or nil;
+            local HeaderStart = HasIcon and -((HeaderTextWidth + 19) / 2) or nil;
             local GroupboxLabel = Library:CreateLabel({
-                Size = UDim2.new(1, HasIcon and -34 or -16, 0, 17);
-                Position = UDim2.new(0, HasIcon and 26 or 8, 0, 2);
+                Size = HasIcon and UDim2.fromOffset(HeaderTextWidth, 17) or UDim2.new(1, -16, 0, 17);
+                Position = HasIcon and UDim2.new(0.5, HeaderStart + 19, 0, 2) or UDim2.new(0, 8, 0, 2);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
@@ -3745,7 +3747,7 @@ function Library:CreateWindow(...)
                     ImageRectSize = IconRectSize;
                     ImageRectOffset = IconRectOffset;
                     ImageColor3 = Library.FontColor;
-                    Position = UDim2.new(0, 8, 0, 5);
+                    Position = UDim2.new(0.5, HeaderStart, 0, 3);
                     Size = UDim2.fromOffset(14, 14);
                     ScaleType = Enum.ScaleType.Fit;
                     ZIndex = 5;
