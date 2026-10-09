@@ -16,6 +16,11 @@ end;
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 
 local ScreenGuiName = 'LinoriaLibraryScreenGui';
+local PreviousLibrary = getgenv().Library;
+if type(PreviousLibrary) == 'table' and type(PreviousLibrary.Unload) == 'function' then
+    PreviousLibrary:Unload();
+end;
+
 local PreviousScreenGuis = {};
 for _, ExistingGui in next, CoreGui:GetChildren() do
     if ExistingGui:IsA('ScreenGui') then
@@ -1200,6 +1205,11 @@ do
                 return;
             end;
 
+            local ContainerLabelRegistry = Library.RegistryMap[ContainerLabel];
+            if not ContainerLabel.Parent or not ContainerLabelRegistry then
+                return;
+            end;
+
             local State = KeyPicker:GetState();
 
             ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
@@ -1207,7 +1217,7 @@ do
             ContainerLabel.Visible = true;
             ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
 
-            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+            ContainerLabelRegistry.Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
 
             local YSize = 0
             local XSize = 0
