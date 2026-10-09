@@ -95,31 +95,21 @@ function Library:AddCorner(GuiObject, Radius)
 end;
 
 function Library:AddOuterGlow(GuiObject)
-    local function GetGlowColor(HueOffset)
-        local Hue, Saturation, Value = Color3.toHSV(Library.AccentColor);
-        if Saturation < 0.18 then
-            Hue = 0.58;
-        end;
-        return Color3.fromHSV((Hue + HueOffset) % 1, math.max(Saturation, 0.62), math.clamp(Value, 0.55, 0.9));
-    end;
-
     local Layers = {
-        { Thickness = 9, MinTransparency = 0.965, MaxTransparency = 0.985, Duration = 2.2, HueOffset = 0.035 },
-        { Thickness = 4, MinTransparency = 0.94, MaxTransparency = 0.98, Duration = 1.6, HueOffset = 0 },
-        { Thickness = 1.5, MinTransparency = 0.65, MaxTransparency = 0.82, Duration = 1.2, HueOffset = 0.08 },
+        { Thickness = 9, MinTransparency = 0.965, MaxTransparency = 0.985, Duration = 2.2 },
+        { Thickness = 4, MinTransparency = 0.94, MaxTransparency = 0.98, Duration = 1.6 },
+        { Thickness = 1.5, MinTransparency = 0.65, MaxTransparency = 0.82, Duration = 1.2 },
     };
 
     for _, Settings in ipairs(Layers) do
         local GlowStroke = Instance.new('UIStroke');
-        GlowStroke.Color = GetGlowColor(Settings.HueOffset);
+        GlowStroke.Color = Color3.new(1, 1, 1);
         GlowStroke.Thickness = Settings.Thickness;
         GlowStroke.Transparency = Settings.MaxTransparency;
         GlowStroke.Parent = GuiObject;
         GlowStroke:SetAttribute('LibraryGlow', true);
         Library:AddToRegistry(GlowStroke, {
-            Color = function()
-                return GetGlowColor(Settings.HueOffset);
-            end;
+            Color = Color3.new(1, 1, 1);
         });
 
         local GlowTween = TweenService:Create(
@@ -3169,6 +3159,7 @@ do
         Parent = ScreenGui;
     });
     Library:AddCorner(KeybindOuter, 13);
+    Library:AddOuterGlow(KeybindOuter);
 
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
