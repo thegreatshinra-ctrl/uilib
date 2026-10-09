@@ -1484,6 +1484,7 @@ do
                 Size = UDim2.new(1, -4, 0, 20);
                 ZIndex = 5;
             });
+            Library:AddCorner(Outer);
 
             local Inner = Library:Create('Frame', {
                 BackgroundColor3 = Library.MainColor;
@@ -1493,6 +1494,7 @@ do
                 ZIndex = 6;
                 Parent = Outer;
             });
+            Library:AddCorner(Inner);
 
             local Label = Library:CreateLabel({
                 Size = UDim2.new(1, 0, 1, 0);
@@ -1712,6 +1714,7 @@ do
             ZIndex = 5;
             Parent = Container;
         });
+        Library:AddCorner(TextBoxOuter);
 
         local TextBoxInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
@@ -1721,6 +1724,7 @@ do
             ZIndex = 6;
             Parent = TextBoxOuter;
         });
+        Library:AddCorner(TextBoxInner);
 
         Library:AddToRegistry(TextBoxInner, {
             BackgroundColor3 = 'MainColor';
@@ -2255,6 +2259,7 @@ do
             ZIndex = 5;
             Parent = Container;
         });
+        Library:AddCorner(DropdownOuter);
 
         Library:AddToRegistry(DropdownOuter, {
             BorderColor3 = 'Black';
@@ -2268,6 +2273,7 @@ do
             ZIndex = 6;
             Parent = DropdownOuter;
         });
+        Library:AddCorner(DropdownInner);
 
         Library:AddToRegistry(DropdownInner, {
             BackgroundColor3 = 'MainColor';
@@ -3020,7 +3026,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = ScreenGui;
     });
-    Library:AddCorner(Outer);
+    Library:AddCorner(Outer, 8);
 
     Library:MakeDraggable(Outer, 25);
 
@@ -3033,7 +3039,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     });
-    Library:AddCorner(Inner);
+    Library:AddCorner(Inner, 6);
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
@@ -3073,7 +3079,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Inner;
     });
-    Library:AddCorner(MainSectionOuter);
+    Library:AddCorner(MainSectionOuter, 6);
 
     Library:AddToRegistry(MainSectionOuter, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3089,7 +3095,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = MainSectionOuter;
     });
-    Library:AddCorner(MainSectionInner);
+    Library:AddCorner(MainSectionInner, 5);
 
     Library:AddToRegistry(MainSectionInner, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3118,7 +3124,7 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
-    Library:AddCorner(TabContainer);
+    Library:AddCorner(TabContainer, 5);
     
 
     Library:AddToRegistry(TabContainer, {
@@ -3147,6 +3153,7 @@ function Library:CreateWindow(...)
             ZIndex = 1;
             Parent = TabArea;
         });
+        Library:AddCorner(TabButton);
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
@@ -3369,6 +3376,7 @@ function Library:CreateWindow(...)
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             });
+            Library:AddCorner(BoxOuter);
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -3384,6 +3392,7 @@ function Library:CreateWindow(...)
                 ZIndex = 4;
                 Parent = BoxOuter;
             });
+            Library:AddCorner(BoxInner);
 
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -3426,6 +3435,7 @@ function Library:CreateWindow(...)
                     ZIndex = 6;
                     Parent = TabboxButtons;
                 });
+                Library:AddCorner(Button);
 
                 Library:AddToRegistry(Button, {
                     BackgroundColor3 = 'MainColor';
