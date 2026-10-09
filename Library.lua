@@ -2179,7 +2179,11 @@ do
             end;
             Slider.MaxSize = TrackWidth;
 
-            if Info.Compact then
+            if Info.Percent then
+                local PercentValue = Slider.Max == Slider.Min and 0
+                    or math.floor(((Slider.Value - Slider.Min) / (Slider.Max - Slider.Min)) * 100 + 0.5);
+                DisplayLabel.Text = string.format('%d%%', PercentValue);
+            elseif Info.Compact then
                 DisplayLabel.Text = Info.Text .. ': ' .. Slider.Value .. Suffix
             elseif Info.HideMax then
                 DisplayLabel.Text = string.format('%s', Slider.Value .. Suffix)
