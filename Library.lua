@@ -3683,7 +3683,8 @@ function Library:CreateWindow(...)
                 BackgroundColor3 = 'BackgroundColor';
             });
 
-            local HasIcon = Info.Icon ~= nil and Info.Icon ~= '';
+            local GroupboxIcon = Info.Icon;
+            local HasIcon = GroupboxIcon ~= nil and GroupboxIcon ~= '';
             local GroupboxLabel = Library:CreateLabel({
                 Size = UDim2.new(1, HasIcon and -34 or -16, 0, 17);
                 Position = UDim2.new(0, HasIcon and 26 or 8, 0, 4);
@@ -3695,9 +3696,9 @@ function Library:CreateWindow(...)
             });
 
             if HasIcon then
-                assert(type(Info.Icon) == 'string' or type(Info.Icon) == 'number', 'AddGroupbox: `Icon` must be an asset ID or image URI.');
-                local Icon = tostring(Info.Icon);
-                if type(Info.Icon) == 'number' or Icon:match('^%d+$') then
+                assert(type(GroupboxIcon) == 'string' or type(GroupboxIcon) == 'number', 'AddGroupbox: `Icon` must be an asset ID or image URI.');
+                local Icon = tostring(GroupboxIcon);
+                if type(GroupboxIcon) == 'number' or Icon:match('^%d+$') then
                     Icon = 'rbxassetid://' .. Icon;
                 end;
 
