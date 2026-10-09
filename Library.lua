@@ -13,7 +13,14 @@ end;
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 
+local ScreenGuiName = 'LinoriaLibraryScreenGui';
+local PreviousScreenGui = CoreGui:FindFirstChild(ScreenGuiName);
+if PreviousScreenGui then
+    PreviousScreenGui:Destroy();
+end;
+
 local ScreenGui = Instance.new('ScreenGui');
+ScreenGui.Name = ScreenGuiName;
 ProtectGui(ScreenGui);
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
@@ -3591,7 +3598,7 @@ function Library:CreateWindow(...)
 
                     Cursor.Color = Library.AccentColor;
 
-                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
+                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y + 2);
                     Cursor.PointB = Vector2.new(mPos.X + 16, mPos.Y + 6);
                     Cursor.PointC = Vector2.new(mPos.X + 6, mPos.Y + 16);
 
