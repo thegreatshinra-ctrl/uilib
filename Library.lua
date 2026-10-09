@@ -3121,6 +3121,10 @@ function Library:CreateWindow(...)
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
     if type(Config.TabPadding) ~= 'number' then Config.TabPadding = 0 end
     if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
+    assert(
+        Config.Status == nil or Config.Status == 'Standard' or Config.Status == 'Premium',
+        "CreateWindow: `Status` must be 'Standard' or 'Premium'."
+    );
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
@@ -3136,7 +3140,10 @@ function Library:CreateWindow(...)
 
     local SnowfallLayer;
     local Snowflakes = {};
+    local SnowflakeScales = {};
+    local SnowflakeBaseScales = {};
     local SnowfallTweens = {};
+    local SnowfallTwinkleTweens = {};
     local SnowfallGeneration = 0;
     local SnowRandomizer = Random.new();
     if Config.Snowfall then
@@ -3148,8 +3155,8 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, 18 do
-            local Size = SnowRandomizer:NextInteger(9, 17);
+        for _ = 1, 42 do
+            local Size = SnowRandomizer:NextInteger(10, 22);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3159,19 +3166,40 @@ function Library:CreateWindow(...)
                 ZIndex = 1;
                 Parent = SnowfallLayer;
             });
+            local FlakeScale = Instance.new('UIScale');
+            FlakeScale.Scale = SnowRandomizer:NextNumber(0.8, 1.15);
+            FlakeScale.Parent = Flake;
+            SnowflakeScales[Flake] = FlakeScale;
+            SnowflakeBaseScales[Flake] = FlakeScale.Scale;
 
-            for _, Rotation in next, { 0, 60, 120 } do
+            local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
+            for RayIndex = 0, 5 do
+                local Rotation = RayIndex * 60;
                 Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
                     BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                    BackgroundTransparency = SnowRandomizer:NextNumber(0.3, 0.65);
+                    BackgroundTransparency = RayTransparency;
                     BorderSizePixel = 0;
                     Position = UDim2.fromScale(0.5, 0.5);
                     Rotation = Rotation;
-                    Size = UDim2.new(0, 1, 0.82, 0);
+                    Size = UDim2.new(0, 1, 0.88, 0);
                     ZIndex = 1;
                     Parent = Flake;
                 });
+
+                for _, Branch in next, { -35, 35 } do
+                    Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 1);
+                        BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                        BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
+                        BorderSizePixel = 0;
+                        Position = UDim2.new(0.5, 0, 0.32, 0);
+                        Rotation = Rotation + Branch;
+                        Size = UDim2.new(0, 1, 0.28, 0);
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
+                end;
             end;
 
             table.insert(Snowflakes, Flake);
@@ -3182,6 +3210,11 @@ function Library:CreateWindow(...)
             for Flake, FallTween in next, SnowfallTweens do
                 FallTween:Cancel();
                 SnowfallTweens[Flake] = nil;
+            end;
+            for Flake, TwinkleTween in next, SnowfallTwinkleTweens do
+                TwinkleTween:Cancel();
+                SnowfallTwinkleTweens[Flake] = nil;
+                SnowflakeScales[Flake].Scale = SnowflakeBaseScales[Flake];
             end;
         end;
     end;
@@ -3245,6 +3278,46 @@ function Library:CreateWindow(...)
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 1;
             Parent = Inner;
+        });
+    end;
+
+    if Config.Status then
+        local IsPremium = Config.Status == 'Premium';
+        local StatusColor = IsPremium and Color3.fromRGB(255, 205, 112) or Color3.fromRGB(190, 198, 210);
+        local BadgeBackground = IsPremium and Color3.fromRGB(58, 45, 25) or Color3.fromRGB(43, 46, 52);
+        local StatusTextWidth = Library:GetTextBounds(Config.Status, Library.Font, 12);
+        local BadgeWidth = StatusTextWidth + 28;
+        local StatusBadge = Library:Create('Frame', {
+            AnchorPoint = Vector2.new(1, 0.5);
+            BackgroundColor3 = BadgeBackground;
+            BorderColor3 = IsPremium and Color3.fromRGB(105, 79, 38) or Color3.fromRGB(67, 72, 81);
+            Position = UDim2.new(1, -16, 0.5, 0);
+            Size = UDim2.fromOffset(BadgeWidth, 19);
+            ZIndex = 2;
+            Parent = Inner;
+        });
+        Library:AddCorner(StatusBadge, 10);
+
+        local StatusDot = Library:Create('Frame', {
+            AnchorPoint = Vector2.new(0, 0.5);
+            BackgroundColor3 = StatusColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 8, 0.5, 0);
+            Size = UDim2.fromOffset(5, 5);
+            ZIndex = 3;
+            Parent = StatusBadge;
+        });
+        Library:AddCorner(StatusDot, 3);
+
+        Library:CreateLabel({
+            Position = UDim2.new(0, 18, 0, 0);
+            Size = UDim2.new(1, -24, 1, 0);
+            Text = Config.Status;
+            TextColor3 = StatusColor;
+            TextSize = 12;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 3;
+            Parent = StatusBadge;
         });
     end;
 
@@ -3822,15 +3895,27 @@ function Library:CreateWindow(...)
             if Toggled then
                 for _, Flake in next, Snowflakes do
                     Flake.Visible = true;
+                    local FlakeScale = SnowflakeScales[Flake];
+                    local BaseScale = SnowflakeBaseScales[Flake];
+                    FlakeScale.Scale = BaseScale;
+                    local TwinkleTween = TweenService:Create(
+                        FlakeScale,
+                        TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
+                    );
+                    SnowfallTwinkleTweens[Flake] = TwinkleTween;
+                    TwinkleTween:Play();
                     task.spawn(function()
+                        local FirstFall = true;
                         while Generation == SnowfallGeneration and Toggled do
                             local StartX = SnowRandomizer:NextNumber(0, 1);
-                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.12, 0.12), 0, 1);
-                            Flake.Position = UDim2.fromScale(StartX, SnowRandomizer:NextNumber(-0.16, -0.03));
+                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
+                            local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
+                            Flake.Position = UDim2.fromScale(StartX, StartY);
                             Flake.Rotation = 0;
                             local FallTween = TweenService:Create(
                                 Flake,
-                                TweenInfo.new(SnowRandomizer:NextNumber(7, 13), Enum.EasingStyle.Linear),
+                                TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
                                 {
                                     Position = UDim2.fromScale(EndX, 1.08);
                                     Rotation = SnowRandomizer:NextNumber(-180, 180);
@@ -3845,6 +3930,7 @@ function Library:CreateWindow(...)
                             if Generation ~= SnowfallGeneration or not Toggled then
                                 break;
                             end;
+                            FirstFall = false;
                         end;
                         if Generation == SnowfallGeneration then
                             Flake.Visible = false;
@@ -3855,6 +3941,11 @@ function Library:CreateWindow(...)
                 for Flake, FallTween in next, SnowfallTweens do
                     FallTween:Cancel();
                     SnowfallTweens[Flake] = nil;
+                end;
+                for Flake, TwinkleTween in next, SnowfallTwinkleTweens do
+                    TwinkleTween:Cancel();
+                    SnowfallTwinkleTweens[Flake] = nil;
+                    SnowflakeScales[Flake].Scale = SnowflakeBaseScales[Flake];
                 end;
                 for _, Flake in next, Snowflakes do
                     Flake.Visible = false;
