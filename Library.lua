@@ -32,7 +32,7 @@ local Library = {
     FontColor = Color3.fromRGB(255, 255, 255);
     MainColor = Color3.fromRGB(28, 28, 28);
     BackgroundColor = Color3.fromRGB(20, 20, 20);
-    AccentColor = Color3.fromRGB(0, 85, 255);
+    AccentColor = Color3.fromRGB(255, 255, 255);
     OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
@@ -127,6 +127,17 @@ function Library:Create(Class, Properties)
 
     for Property, Value in next, Properties do
         _Instance[Property] = Value;
+    end;
+
+    if _Instance:IsA('Frame')
+        or _Instance:IsA('TextButton')
+        or _Instance:IsA('ImageButton')
+        or _Instance:IsA('TextBox')
+        or _Instance:IsA('ScrollingFrame') then
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = _Instance;
+        });
     end;
 
     return _Instance;
@@ -1850,6 +1861,12 @@ do
             Parent = ToggleOuter;
         });
 
+        local ToggleGradient = Library:Create('UIGradient', {
+            Color = ColorSequence.new(Color3.new(1, 1, 1));
+            Rotation = 0;
+            Parent = ToggleInner;
+        });
+
         Library:AddToRegistry(ToggleInner, {
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
@@ -1894,10 +1911,13 @@ do
         end
 
         function Toggle:Display()
-            ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
+            ToggleInner.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Library.MainColor;
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
+            ToggleGradient.Color = Toggle.Value
+                and ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175))
+                or ColorSequence.new(Color3.new(1, 1, 1));
 
-            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
+            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or 'MainColor';
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
         end;
 
@@ -2013,29 +2033,17 @@ do
         });
 
         local Fill = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderColor3 = Library.AccentColorDark;
+            BackgroundColor3 = Color3.new(1, 1, 1);
+            BorderSizePixel = 0;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
         });
 
-        Library:AddToRegistry(Fill, {
-            BackgroundColor3 = 'AccentColor';
-            BorderColor3 = 'AccentColorDark';
-        });
-
-        local HideBorderRight = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(1, 0, 0, 0);
-            Size = UDim2.new(0, 1, 1, 0);
-            ZIndex = 8;
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175));
+            Rotation = 0;
             Parent = Fill;
-        });
-
-        Library:AddToRegistry(HideBorderRight, {
-            BackgroundColor3 = 'AccentColor';
         });
 
         local DisplayLabel = Library:CreateLabel({
@@ -2056,8 +2064,7 @@ do
         end
 
         function Slider:UpdateColors()
-            Fill.BackgroundColor3 = Library.AccentColor;
-            Fill.BorderColor3 = Library.AccentColorDark;
+            Fill.BackgroundColor3 = Color3.new(1, 1, 1);
         end;
 
         function Slider:Display()
@@ -2073,8 +2080,6 @@ do
 
             local X = math.ceil(Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, Slider.MaxSize));
             Fill.Size = UDim2.new(0, X, 1, 0);
-
-            HideBorderRight.Visible = not (X == Slider.MaxSize or X == 0);
         end;
 
         function Slider:OnChanged(Func)
@@ -2974,7 +2979,7 @@ function Library:CreateWindow(...)
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
+        BorderColor3 = Library.MainColor;
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
@@ -2984,7 +2989,7 @@ function Library:CreateWindow(...)
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'AccentColor';
+        BorderColor3 = 'MainColor';
     });
 
     local WindowLabel = Library:CreateLabel({
@@ -2995,6 +3000,22 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Inner;
     });
+
+    if type(Config.Subtitle) == 'string' and Config.Subtitle ~= '' then
+        local TitleWidth = Library:GetTextBounds(Config.Title, Library.Font, 16);
+        local SubtitleWidth = Library:GetTextBounds(Config.Subtitle, Library.Font, 14);
+
+        Library:CreateLabel({
+            Position = UDim2.new(0, 7 + TitleWidth + 8, 0, 0);
+            Size = UDim2.new(0, SubtitleWidth, 0, 25);
+            Text = Config.Subtitle;
+            TextSize = 14;
+            TextTransparency = 0.45;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 1;
+            Parent = Inner;
+        });
+    end;
 
     local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
@@ -3539,7 +3560,7 @@ function Library:CreateWindow(...)
                 while Toggled and ScreenGui.Parent do
                     InputService.MouseIconEnabled = false;
 
-                    local mPos = InputService:GetMouseLocation();
+                    local mPos = Vector2.new(Mouse.X, Mouse.Y);
 
                     Cursor.Color = Library.AccentColor;
 
