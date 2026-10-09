@@ -3551,8 +3551,8 @@ function Library:CreateWindow(...)
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.fromOffset(13, 3);
-        Size = UDim2.fromOffset(22, 22);
+        Position = UDim2.fromOffset(3, 2);
+        Size = UDim2.fromOffset(20, 20);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = TitleIconBadge;
