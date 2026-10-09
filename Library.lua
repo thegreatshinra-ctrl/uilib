@@ -3533,7 +3533,17 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(HeaderFill, { BackgroundColor3 = 'BackgroundColor' });
     Library:AddToRegistry(HeaderDivider, { BackgroundColor3 = 'OutlineColor' });
 
-    local HeaderLeftPadding = 17;
+    local HeaderLeftPadding = 40;
+    Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = 'rbxassetid://72635809476881';
+        Position = UDim2.new(0, 15, 0.5, -9);
+        Size = UDim2.fromOffset(18, 18);
+        ScaleType = Enum.ScaleType.Fit;
+        ZIndex = 3;
+        Parent = Inner;
+    });
+
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, HeaderLeftPadding, 0, 0);
         Size = UDim2.new(0, 0, 0, 32);
