@@ -91,6 +91,20 @@ function Library:AddCorner(GuiObject, Radius)
     return Corner;
 end;
 
+function Library:GetIconAsset(IconName)
+    assert(type(IconName) == 'string' and IconName ~= '', 'GetIconAsset: icon name must be a non-empty string.');
+
+    local Name = IconName:lower():gsub('%.svg$', '');
+    assert(Name:match('^[%w%-]+$'), 'GetIconAsset: icon name may only contain letters, numbers, and hyphens.');
+
+    local Provider = Library.IconProvider;
+    assert(type(Provider) == 'table' and type(Provider.GetAsset) == 'function', 'GetIconAsset: set `Library.IconProvider` to a Lucide Roblox provider first.');
+
+    local Asset = Provider.GetAsset(Name, 48);
+    assert(type(Asset) == 'table' and type(Asset.Url) == 'string' and typeof(Asset.ImageRectSize) == 'Vector2' and typeof(Asset.ImageRectOffset) == 'Vector2', 'GetIconAsset: icon provider returned invalid asset data.');
+    return Asset.Url, Asset.ImageRectSize, Asset.ImageRectOffset;
+end;
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -3532,21 +3546,10 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
-    local FooterLeft = Config.FooterLeft or 'Tour UI';
     local FooterRight = Config.FooterRight or ('Build: ' .. os.date('%b. ') .. tonumber(os.date('%d')) .. os.date(', %Y'));
-    local FooterLeftLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 12, 1, -24);
-        Size = UDim2.new(0.5, -16, 0, 16);
-        Text = FooterLeft;
-        TextColor3 = Color3.fromRGB(145, 145, 145);
-        TextSize = 12;
-        TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 2;
-        Parent = Inner;
-    });
     local FooterRightLabel = Library:CreateLabel({
-        Position = UDim2.new(0.5, 4, 1, -24);
-        Size = UDim2.new(0.5, -16, 0, 16);
+        Position = UDim2.new(0, 0, 1, -24);
+        Size = UDim2.new(1, -12, 0, 16);
         Text = FooterRight;
         TextColor3 = Color3.fromRGB(145, 145, 145);
         TextSize = 12;
@@ -3595,15 +3598,12 @@ function Library:CreateWindow(...)
         });
 
         if HasIcon then
-            assert(type(Icon) == 'string' or type(Icon) == 'number', 'AddTab: `Icon` must be an asset ID or image URI.');
-            local IconImage = tostring(Icon);
-            if type(Icon) == 'number' or IconImage:match('^%d+$') then
-                IconImage = 'rbxassetid://' .. IconImage;
-            end;
-
+            local IconImage, IconRectSize, IconRectOffset = Library:GetIconAsset(Icon);
             local TabIcon = Library:Create('ImageLabel', {
                 BackgroundTransparency = 1;
                 Image = IconImage;
+                ImageRectSize = IconRectSize;
+                ImageRectOffset = IconRectOffset;
                 ImageColor3 = Library.FontColor;
                 Position = UDim2.new(0, 8, 0.5, -6);
                 Size = UDim2.fromOffset(12, 12);
@@ -3738,15 +3738,12 @@ function Library:CreateWindow(...)
             });
 
             if HasIcon then
-                assert(type(GroupboxIcon) == 'string' or type(GroupboxIcon) == 'number', 'AddGroupbox: `Icon` must be an asset ID or image URI.');
-                local Icon = tostring(GroupboxIcon);
-                if type(GroupboxIcon) == 'number' or Icon:match('^%d+$') then
-                    Icon = 'rbxassetid://' .. Icon;
-                end;
-
+                local IconImage, IconRectSize, IconRectOffset = Library:GetIconAsset(GroupboxIcon);
                 local IconLabel = Library:Create('ImageLabel', {
                     BackgroundTransparency = 1;
-                    Image = Icon;
+                    Image = IconImage;
+                    ImageRectSize = IconRectSize;
+                    ImageRectOffset = IconRectOffset;
                     ImageColor3 = Library.FontColor;
                     Position = UDim2.new(0, 8, 0, 5);
                     Size = UDim2.fromOffset(14, 14);
