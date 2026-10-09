@@ -3541,7 +3541,7 @@ function Library:CreateWindow(...)
         Size = UDim2.fromOffset(18, 18);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 3;
-        Parent = Inner;
+        Parent = Header;
     });
 
     local WindowLabel = Library:CreateLabel({
