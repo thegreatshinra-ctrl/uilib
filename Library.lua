@@ -67,11 +67,11 @@ local Library = {
 
     HudRegistry = {};
 
-    FontColor = Color3.fromRGB(238, 238, 238);
-    MainColor = Color3.fromRGB(17, 17, 17);
-    BackgroundColor = Color3.fromRGB(10, 10, 10);
+    FontColor = Color3.fromRGB(232, 232, 234);
+    MainColor = Color3.fromRGB(12, 13, 15);
+    BackgroundColor = Color3.fromRGB(7, 8, 10);
     AccentColor = Color3.fromRGB(255, 255, 255);
-    OutlineColor = Color3.fromRGB(34, 34, 34);
+    OutlineColor = Color3.fromRGB(20, 21, 24);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
@@ -2232,89 +2232,63 @@ do
 
         if not Info.Compact then
             Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 16);
+                Size = UDim2.new(1, -76, 0, 15);
                 TextSize = 14;
                 Text = Info.Text;
                 TextXAlignment = Enum.TextXAlignment.Left;
-                TextYAlignment = Enum.TextYAlignment.Bottom;
+                TextYAlignment = Enum.TextYAlignment.Center;
                 ZIndex = 5;
                 Parent = Container;
             });
 
-            Groupbox:AddBlank(4);
+            Groupbox:AddBlank(2);
+        else
+            Groupbox:AddBlank(17);
         end
 
         local SliderOuter = Library:Create('Frame', {
-            BackgroundColor3 = Library.OutlineColor;
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 18);
+            BackgroundColor3 = Color3.fromRGB(50, 51, 54);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -4, 0, 8);
             ZIndex = 5;
             Parent = Container;
         });
-        Library:AddCorner(SliderOuter, 9);
-
-        Library:AddToRegistry(SliderOuter, {
-            BackgroundColor3 = 'OutlineColor';
-            BorderColor3 = 'Black';
-        });
+        Library:AddCorner(SliderOuter, 4);
 
         local SliderInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
+            BackgroundColor3 = Color3.fromRGB(50, 51, 54);
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 1, 0, 1);
-            Size = UDim2.new(1, -2, 1, -2);
+            Size = UDim2.fromScale(1, 1);
             ZIndex = 6;
             Parent = SliderOuter;
         });
-        Library:AddCorner(SliderInner, 8);
-
-        Library:AddToRegistry(SliderInner, {
-            BackgroundColor3 = 'BackgroundColor';
-        });
+        Library:AddCorner(SliderInner, 4);
 
         local Fill = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(1, 1, 1);
+            BackgroundColor3 = Color3.fromRGB(235, 235, 237);
             BorderSizePixel = 0;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
         });
-        Library:AddCorner(Fill, 8);
+        Library:AddCorner(Fill, 4);
 
         Library:Create('UIGradient', {
-            Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(190, 190, 190));
+            Color = ColorSequence.new(Color3.fromRGB(248, 248, 249), Color3.fromRGB(211, 212, 215));
             Rotation = 0;
             Parent = Fill;
         });
 
-        local Knob = Library:Create('Frame', {
-            AnchorPoint = Vector2.new(0.5, 0.5);
-            BackgroundColor3 = Library.OutlineColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0.5, 0);
-            Size = UDim2.fromOffset(14, 14);
-            ZIndex = 8;
-            Parent = SliderInner;
-        });
-        Library:AddCorner(Knob, 7);
-
-        local KnobCenter = Library:Create('Frame', {
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(3, 3);
-            Size = UDim2.new(1, -6, 1, -6);
-            ZIndex = 9;
-            Parent = Knob;
-        });
-        Library:AddCorner(KnobCenter, 4);
-
         local DisplayLabel = Library:CreateLabel({
-            Size = UDim2.new(1, 0, 1, 0);
-            TextSize = 13;
+            Position = UDim2.new(0, 0, 0, -17);
+            Size = UDim2.new(1, -4, 0, 15);
+            TextSize = 12;
             Text = 'Infinite';
-            ZIndex = 10;
-            Parent = SliderInner;
+            TextXAlignment = Info.Compact and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right;
+            ZIndex = 6;
+            Parent = SliderOuter;
         });
+        Library:AddToRegistry(DisplayLabel, { TextColor3 = 'FontColor' });
 
         Library:OnHighlight(SliderOuter, SliderOuter,
             { BorderColor3 = 'AccentColor' },
@@ -2355,13 +2329,6 @@ do
                 TrackWidth
             );
             Fill.Size = UDim2.new(0, X, 1, 0);
-            local MinKnobX = math.min(7, TrackWidth / 2);
-            Knob.Position = UDim2.new(
-                0,
-                math.clamp(X, MinKnobX, math.max(TrackWidth - 7, MinKnobX)),
-                0.5,
-                0
-            );
         end;
 
         function Slider:OnChanged(Func)
@@ -2428,7 +2395,7 @@ do
         end);
 
         Slider:Display();
-        Groupbox:AddBlank(Info.BlankSize or 6);
+        Groupbox:AddBlank(Info.BlankSize or 8);
         Groupbox:Resize();
 
         Options[Idx] = Slider;
@@ -3417,6 +3384,37 @@ function Library:CreateWindow(...)
         BorderColor3 = 'MainColor';
     });
 
+    local Header = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 0, 32);
+        ZIndex = 2;
+        Parent = Inner;
+    });
+    Library:AddCorner(Header, 12);
+
+    local HeaderFill = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 0, 0, 16);
+        Size = UDim2.new(1, 0, 0, 16);
+        ZIndex = 2;
+        Parent = Inner;
+    });
+
+    local HeaderDivider = Library:Create('Frame', {
+        BackgroundColor3 = Library.OutlineColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 12, 0, 31);
+        Size = UDim2.new(1, -24, 0, 1);
+        ZIndex = 2;
+        Parent = Inner;
+    });
+
+    Library:AddToRegistry(Header, { BackgroundColor3 = 'BackgroundColor' });
+    Library:AddToRegistry(HeaderFill, { BackgroundColor3 = 'BackgroundColor' });
+    Library:AddToRegistry(HeaderDivider, { BackgroundColor3 = 'OutlineColor' });
+
     local HeaderLeftPadding = 17;
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, HeaderLeftPadding, 0, 0);
@@ -3424,7 +3422,7 @@ function Library:CreateWindow(...)
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
         TextYAlignment = Enum.TextYAlignment.Center;
-        ZIndex = 1;
+        ZIndex = 3;
         Parent = Inner;
     });
 
@@ -3440,15 +3438,15 @@ function Library:CreateWindow(...)
             TextTransparency = 0.45;
             TextXAlignment = Enum.TextXAlignment.Left;
             TextYAlignment = Enum.TextYAlignment.Center;
-            ZIndex = 1;
+            ZIndex = 3;
             Parent = Inner;
         });
     end;
 
     if Config.Status then
         local StatusColor = Color3.fromRGB(245, 245, 248);
-        local BadgeBackground = Color3.fromRGB(43, 46, 52);
-        local BadgeOutline = Color3.fromRGB(67, 72, 81);
+        local BadgeBackground = Color3.fromRGB(24, 25, 28);
+        local BadgeOutline = Color3.fromRGB(35, 37, 41);
         local StatusTextWidth = Library:GetTextBounds(Config.Status, Library.Font, 12);
         local BadgeWidth = StatusTextWidth + 28;
         local StatusBadge = Library:Create('Frame', {
@@ -3457,7 +3455,7 @@ function Library:CreateWindow(...)
             BorderColor3 = BadgeOutline;
             Position = UDim2.new(1, -16, 0, 16);
             Size = UDim2.fromOffset(BadgeWidth, 19);
-            ZIndex = 2;
+            ZIndex = 3;
             Parent = Inner;
         });
         Library:AddCorner(StatusBadge, 10);
@@ -3468,7 +3466,7 @@ function Library:CreateWindow(...)
             BorderSizePixel = 0;
             Position = UDim2.new(0, 8, 0.5, 0);
             Size = UDim2.fromOffset(5, 5);
-            ZIndex = 3;
+            ZIndex = 4;
             Parent = StatusBadge;
         });
         Library:AddCorner(StatusDot, 3);
@@ -3480,7 +3478,7 @@ function Library:CreateWindow(...)
             TextColor3 = StatusColor;
             TextSize = 12;
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 3;
+            ZIndex = 4;
             Parent = StatusBadge;
         });
     end;
@@ -3728,10 +3726,10 @@ function Library:CreateWindow(...)
             local GroupboxIcon = Info.Icon;
             local HasIcon = GroupboxIcon ~= nil and GroupboxIcon ~= '';
             local HeaderTextWidth = HasIcon and Library:GetTextBounds(Info.Name, Library.Font, 14, Vector2.new(1000, 17)) or nil;
-            local HeaderStart = HasIcon and -((HeaderTextWidth + 19) / 2) or nil;
+            local HeaderStart = HasIcon and -((HeaderTextWidth + 23) / 2) or nil;
             local GroupboxLabel = Library:CreateLabel({
                 Size = HasIcon and UDim2.fromOffset(HeaderTextWidth, 17) or UDim2.new(1, -16, 0, 17);
-                Position = HasIcon and UDim2.new(0.5, HeaderStart + 19, 0, 2) or UDim2.new(0, 8, 0, 2);
+                Position = HasIcon and UDim2.new(0.5, HeaderStart + 23, 0, 2) or UDim2.new(0, 8, 0, 2);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
