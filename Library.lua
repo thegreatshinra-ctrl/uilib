@@ -85,7 +85,7 @@ local Library = {
 
 function Library:AddCorner(GuiObject, Radius)
     local Corner = Instance.new('UICorner');
-    Corner.CornerRadius = UDim.new(0, Radius or 4);
+    Corner.CornerRadius = UDim.new(0, Radius or 6);
     Corner.Parent = GuiObject;
     return Corner;
 end;
@@ -1901,7 +1901,7 @@ do
             ZIndex = 5;
             Parent = Container;
         });
-        Library:AddCorner(ToggleOuter);
+        Library:AddCorner(ToggleOuter, 4);
 
         Library:AddToRegistry(ToggleOuter, {
             BorderColor3 = 'Black';
@@ -1915,7 +1915,7 @@ do
             ZIndex = 6;
             Parent = ToggleOuter;
         });
-        Library:AddCorner(ToggleInner);
+        Library:AddCorner(ToggleInner, 4);
 
         local ToggleGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new(Color3.new(1, 1, 1));
@@ -3036,7 +3036,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = ScreenGui;
     });
-    Library:AddCorner(Outer, 8);
+    Library:AddCorner(Outer, 14);
 
     Library:MakeDraggable(Outer, 25);
 
@@ -3049,7 +3049,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     });
-    Library:AddCorner(Inner, 6);
+    Library:AddCorner(Inner, 12);
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
@@ -3089,7 +3089,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Inner;
     });
-    Library:AddCorner(MainSectionOuter, 6);
+    Library:AddCorner(MainSectionOuter, 10);
 
     Library:AddToRegistry(MainSectionOuter, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3105,7 +3105,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = MainSectionOuter;
     });
-    Library:AddCorner(MainSectionInner, 5);
+    Library:AddCorner(MainSectionInner, 8);
 
     Library:AddToRegistry(MainSectionInner, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3134,7 +3134,7 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
-    Library:AddCorner(TabContainer, 5);
+    Library:AddCorner(TabContainer, 8);
     
 
     Library:AddToRegistry(TabContainer, {
