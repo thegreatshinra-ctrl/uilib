@@ -3123,8 +3123,9 @@ function Library:CreateWindow(...)
         BorderColor3 = 'MainColor';
     });
 
+    local HeaderLeftPadding = 17;
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 0);
+        Position = UDim2.new(0, HeaderLeftPadding, 0, 0);
         Size = UDim2.new(0, 0, 0, 25);
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
@@ -3137,7 +3138,7 @@ function Library:CreateWindow(...)
         local SubtitleWidth = Library:GetTextBounds(Config.Subtitle, Library.Font, 14);
 
         Library:CreateLabel({
-            Position = UDim2.new(0, 7 + TitleWidth + 8, 0, 0);
+            Position = UDim2.new(0, HeaderLeftPadding + TitleWidth + 8, 0, 0);
             Size = UDim2.new(0, SubtitleWidth, 0, 25);
             Text = Config.Subtitle;
             TextSize = 14;
