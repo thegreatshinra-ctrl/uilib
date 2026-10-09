@@ -3897,6 +3897,18 @@ function Library:CreateWindow(...)
             });
             Library.RegistryMap[GroupboxLabel].Properties.TextColor3 = Color3.fromRGB(255, 255, 255);
 
+            local GroupboxDivider = Library:Create('Frame', {
+                BackgroundColor3 = Library.OutlineColor;
+                BorderSizePixel = 0;
+                Position = UDim2.new(0, 8, 0, 24);
+                Size = UDim2.new(1, -16, 0, 1);
+                ZIndex = 5;
+                Parent = BoxInner;
+            });
+            Library:AddToRegistry(GroupboxDivider, {
+                BackgroundColor3 = 'OutlineColor';
+            });
+
             if HasIcon then
                 local IconImage, IconRectSize, IconRectOffset = Library:GetIconAsset(GroupboxIcon);
                 local IconLabel = Library:Create('ImageLabel', {
