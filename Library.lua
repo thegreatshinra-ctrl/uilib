@@ -438,6 +438,11 @@ function Library:Unload()
         Connection:Disconnect()
     end
 
+    if Library.SnowfallCleanup then
+        Library.SnowfallCleanup();
+        Library.SnowfallCleanup = nil;
+    end;
+
      -- Call our unload callback, maybe to undo some hooks etc
     if Library.OnUnload then
         Library.OnUnload()
@@ -3129,6 +3134,58 @@ function Library:CreateWindow(...)
         Tabs = {};
     };
 
+    local SnowfallLayer;
+    local Snowflakes = {};
+    local SnowfallTweens = {};
+    local SnowfallGeneration = 0;
+    local SnowRandomizer = Random.new();
+    if Config.Snowfall then
+        SnowfallLayer = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.fromScale(1, 1);
+            Visible = false;
+            ZIndex = 1;
+            Parent = ScreenGui;
+        });
+
+        for _ = 1, 18 do
+            local Size = SnowRandomizer:NextInteger(9, 17);
+            local Flake = Library:Create('Frame', {
+                AnchorPoint = Vector2.new(0.5, 0.5);
+                BackgroundTransparency = 1;
+                Position = UDim2.fromScale(SnowRandomizer:NextNumber(), -0.1);
+                Size = UDim2.fromOffset(Size, Size);
+                Visible = false;
+                ZIndex = 1;
+                Parent = SnowfallLayer;
+            });
+
+            for _, Rotation in next, { 0, 60, 120 } do
+                Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                    BackgroundTransparency = SnowRandomizer:NextNumber(0.3, 0.65);
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.5);
+                    Rotation = Rotation;
+                    Size = UDim2.new(0, 1, 0.82, 0);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+            end;
+
+            table.insert(Snowflakes, Flake);
+        end;
+
+        Library.SnowfallCleanup = function()
+            SnowfallGeneration = SnowfallGeneration + 1;
+            for Flake, FallTween in next, SnowfallTweens do
+                FallTween:Cancel();
+                SnowfallTweens[Flake] = nil;
+            end;
+        end;
+    end;
+
     local Outer = Library:Create('Frame', {
         AnchorPoint = Config.AnchorPoint,
         BackgroundColor3 = Color3.new(0, 0, 0);
@@ -3140,6 +3197,10 @@ function Library:CreateWindow(...)
         Parent = ScreenGui;
     });
     Library:AddCorner(Outer, 14);
+
+    local WindowScale = Instance.new('UIScale');
+    WindowScale.Scale = 1;
+    WindowScale.Parent = Outer;
 
     if Config.Draggable ~= false then
         Library:MakeDraggable(Outer, 25);
@@ -3709,6 +3770,7 @@ function Library:CreateWindow(...)
     local TransparencyCache = {};
     local Toggled = false;
     local Fading = false;
+    local WindowScaleTween;
     local BackgroundBlurEffect;
     if Config.BackgroundBlur then
         BackgroundBlurEffect = Instance.new('BlurEffect');
@@ -3732,8 +3794,71 @@ function Library:CreateWindow(...)
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true;
+            WindowScale.Scale = 0.96;
             if BackgroundBlurEffect then
                 BackgroundBlurEffect.Enabled = true;
+            end;
+        end;
+
+        if WindowScaleTween then
+            WindowScaleTween:Cancel();
+        end;
+        WindowScaleTween = TweenService:Create(
+            WindowScale,
+            TweenInfo.new(
+                FadeTime,
+                Enum.EasingStyle.Quint,
+                Toggled and Enum.EasingDirection.Out or Enum.EasingDirection.In
+            ),
+            { Scale = Toggled and 1 or 0.97 }
+        );
+        WindowScaleTween:Play();
+
+        if SnowfallLayer then
+            SnowfallGeneration = SnowfallGeneration + 1;
+            local Generation = SnowfallGeneration;
+            SnowfallLayer.Visible = Toggled;
+
+            if Toggled then
+                for _, Flake in next, Snowflakes do
+                    Flake.Visible = true;
+                    task.spawn(function()
+                        while Generation == SnowfallGeneration and Toggled do
+                            local StartX = SnowRandomizer:NextNumber(0, 1);
+                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.12, 0.12), 0, 1);
+                            Flake.Position = UDim2.fromScale(StartX, SnowRandomizer:NextNumber(-0.16, -0.03));
+                            Flake.Rotation = 0;
+                            local FallTween = TweenService:Create(
+                                Flake,
+                                TweenInfo.new(SnowRandomizer:NextNumber(7, 13), Enum.EasingStyle.Linear),
+                                {
+                                    Position = UDim2.fromScale(EndX, 1.08);
+                                    Rotation = SnowRandomizer:NextNumber(-180, 180);
+                                }
+                            );
+                            SnowfallTweens[Flake] = FallTween;
+                            FallTween:Play();
+                            FallTween.Completed:Wait();
+                            if SnowfallTweens[Flake] == FallTween then
+                                SnowfallTweens[Flake] = nil;
+                            end;
+                            if Generation ~= SnowfallGeneration or not Toggled then
+                                break;
+                            end;
+                        end;
+                        if Generation == SnowfallGeneration then
+                            Flake.Visible = false;
+                        end;
+                    end);
+                end;
+            else
+                for Flake, FallTween in next, SnowfallTweens do
+                    FallTween:Cancel();
+                    SnowfallTweens[Flake] = nil;
+                end;
+                for _, Flake in next, Snowflakes do
+                    Flake.Visible = false;
+                end;
             end;
         end;
 
