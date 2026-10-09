@@ -251,7 +251,7 @@ function Library:MakeDraggable(Instance, Cutoff)
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
-    local Padding = 8;
+    local Padding = 6;
     local MaxWidth = 260;
     local WidestLine = 0;
     for Line in (InfoStr .. '\n'):gmatch('(.-)\n') do
@@ -261,8 +261,8 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     local ContentWidth = math.clamp(WidestLine, 1, MaxWidth);
     local _, ContentHeight = Library:GetTextBounds(InfoStr, Library.Font, 13, Vector2.new(ContentWidth, 10000));
     ContentHeight = math.max(ContentHeight, 15);
-    local TooltipWidth = ContentWidth + Padding * 2;
-    local TooltipHeight = ContentHeight + Padding * 2;
+    local TooltipWidth = ContentWidth + Padding * 2 + 2;
+    local TooltipHeight = ContentHeight + Padding * 2 + 2;
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor,
         BorderSizePixel = 0;
@@ -1309,8 +1309,14 @@ do
                 if Label:IsA('TextLabel') and Label ~= Library.KeybindEmptyLabel and Label.Visible then
                     ActiveCount = ActiveCount + 1;
                     YSize = YSize + 18;
-                    if (Label.TextBounds.X > XSize) then
-                        XSize = Label.TextBounds.X
+                    local TextWidth = Library:GetTextBounds(
+                        Label.Text,
+                        Label.Font,
+                        Label.TextSize,
+                        Vector2.new(10000, 10000)
+                    )
+                    if TextWidth > XSize then
+                        XSize = TextWidth
                     end;
                 end;
             end;
@@ -1318,7 +1324,7 @@ do
             Library.KeybindEmptyLabel.Visible = ActiveCount == 0;
             Library.KeybindFrame.Size = UDim2.new(
                 0,
-                math.max(XSize + 24, 190),
+                math.max(XSize + 32, 190),
                 0,
                 30 + math.max(YSize, 23) + 4
             );
