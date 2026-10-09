@@ -3081,6 +3081,8 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
+    local HasSelectedTab = false;
+
     function Window:SetWindowTitle(Title)
         WindowLabel.Text = Title;
     end;
@@ -3514,8 +3516,9 @@ function Library:CreateWindow(...)
             end;
         end);
 
-        -- This was the first tab added, so we show it by default.
-        if next(Window.Tabs) == nil then
+        -- Show the first tab regardless of other UI objects inside the container.
+        if not HasSelectedTab then
+            HasSelectedTab = true;
             Tab:ShowTab();
         end;
 
