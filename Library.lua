@@ -3533,15 +3533,29 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(HeaderFill, { BackgroundColor3 = 'BackgroundColor' });
     Library:AddToRegistry(HeaderDivider, { BackgroundColor3 = 'OutlineColor' });
 
-    local HeaderLeftPadding = 40;
+    local HeaderLeftPadding = 47;
+    local TitleIconBadge = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BackgroundTransparency = 0.88;
+        BorderSizePixel = 0;
+        Position = UDim2.fromOffset(11, 4);
+        Size = UDim2.fromOffset(26, 24);
+        ZIndex = 3;
+        Parent = Header;
+    });
+    Library:AddCorner(TitleIconBadge, 8);
+    Library:AddToRegistry(TitleIconBadge, {
+        BackgroundColor3 = 'AccentColor';
+    });
+
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.fromOffset(15, 7);
-        Size = UDim2.fromOffset(18, 18);
+        Position = UDim2.fromOffset(13, 3);
+        Size = UDim2.fromOffset(22, 22);
         ScaleType = Enum.ScaleType.Fit;
-        ZIndex = 3;
-        Parent = Header;
+        ZIndex = 4;
+        Parent = TitleIconBadge;
     });
 
     local WindowLabel = Library:CreateLabel({
