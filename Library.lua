@@ -2077,27 +2077,24 @@ do
         local Container = Groupbox.Container;
 
         local ToggleOuter = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(0, 13, 0, 13);
+            BackgroundColor3 = Color3.fromRGB(91, 93, 99);
+            BorderColor3 = Color3.fromRGB(91, 93, 99);
+            BorderSizePixel = 0;
+            Size = UDim2.new(0, 14, 0, 14);
             ZIndex = 5;
             Parent = Container;
         });
         Library:AddCorner(ToggleOuter, 4);
 
-        Library:AddToRegistry(ToggleOuter, {
-            BorderColor3 = 'Black';
-        });
-
         local ToggleInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
+            BackgroundColor3 = Color3.fromRGB(29, 30, 33);
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(1, 1);
+            Size = UDim2.new(1, -2, 1, -2);
             ZIndex = 6;
             Parent = ToggleOuter;
         });
-        Library:AddCorner(ToggleInner, 4);
+        Library:AddCorner(ToggleInner, 3);
 
         local ToggleGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new(Color3.new(1, 1, 1));
@@ -2106,8 +2103,7 @@ do
         });
 
         Library:AddToRegistry(ToggleInner, {
-            BackgroundColor3 = 'MainColor';
-            BorderColor3 = 'OutlineColor';
+            BackgroundColor3 = Color3.fromRGB(29, 30, 33);
         });
 
         local ToggleLabel = Library:CreateLabel({
@@ -2149,14 +2145,12 @@ do
         end
 
         function Toggle:Display()
-            ToggleInner.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Library.MainColor;
-            ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
+            ToggleInner.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Color3.fromRGB(29, 30, 33);
             ToggleGradient.Color = Toggle.Value
                 and ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175))
                 or ColorSequence.new(Color3.new(1, 1, 1));
 
-            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or 'MainColor';
-            Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
+            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Color3.fromRGB(29, 30, 33);
         end;
 
         function Toggle:OnChanged(Func)
