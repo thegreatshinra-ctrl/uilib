@@ -2763,25 +2763,30 @@ do
     });
 
     local WatermarkOuter = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0.5, 0);
+        BackgroundColor3 = Color3.new(0, 0, 0);
         BorderColor3 = Color3.new(0, 0, 0);
-        Position = UDim2.new(0, 100, 0, -25);
-        Size = UDim2.new(0, 213, 0, 20);
+        BorderSizePixel = 0;
+        Position = UDim2.new(0.5, 0, 0, 18);
+        Size = UDim2.new(0, 213, 0, 30);
         ZIndex = 200;
         Visible = false;
         Parent = ScreenGui;
     });
+    Library:AddCorner(WatermarkOuter, 14);
 
     local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
+        BorderColor3 = Library.OutlineColor;
         BorderMode = Enum.BorderMode.Inset;
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 201;
         Parent = WatermarkOuter;
     });
+    Library:AddCorner(WatermarkInner, 12);
 
     Library:AddToRegistry(WatermarkInner, {
-        BorderColor3 = 'AccentColor';
+        BorderColor3 = 'OutlineColor';
     });
 
     local InnerFrame = Library:Create('Frame', {
@@ -2792,6 +2797,7 @@ do
         ZIndex = 202;
         Parent = WatermarkInner;
     });
+    Library:AddCorner(InnerFrame, 10);
 
     local Gradient = Library:Create('UIGradient', {
         Color = ColorSequence.new({
@@ -2812,17 +2818,16 @@ do
     });
 
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 5, 0, 0);
-        Size = UDim2.new(1, -4, 1, 0);
+        Position = UDim2.new(0, 8, 0, 0);
+        Size = UDim2.new(1, -16, 1, 0);
         TextSize = 14;
-        TextXAlignment = Enum.TextXAlignment.Left;
+        TextXAlignment = Enum.TextXAlignment.Center;
         ZIndex = 203;
         Parent = InnerFrame;
     });
 
     Library.Watermark = WatermarkOuter;
     Library.WatermarkText = WatermarkLabel;
-    Library:MakeDraggable(Library.Watermark);
 
 
 
@@ -2902,7 +2907,7 @@ end;
 
 function Library:SetWatermark(Text)
     local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
-    Library.Watermark.Size = UDim2.new(0, X + 15, 0, (Y * 1.5) + 3);
+    Library.Watermark.Size = UDim2.new(0, X + 28, 0, math.max(30, Y + 12));
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
@@ -3038,7 +3043,9 @@ function Library:CreateWindow(...)
     });
     Library:AddCorner(Outer, 14);
 
-    Library:MakeDraggable(Outer, 25);
+    if Config.Draggable ~= false then
+        Library:MakeDraggable(Outer, 25);
+    end;
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -3660,12 +3667,12 @@ function Library:CreateWindow(...)
         Fading = false;
     end
 
-    Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
+    Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
         if type(Library.ToggleKeybind) == 'table' and Library.ToggleKeybind.Type == 'KeyPicker' then
             if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode.Name == Library.ToggleKeybind.Value then
                 task.spawn(Library.Toggle)
             end
-        elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
+        elseif Input.KeyCode == Enum.KeyCode.RightControl then
             task.spawn(Library.Toggle)
         end
     end))
