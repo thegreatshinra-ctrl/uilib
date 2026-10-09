@@ -4072,34 +4072,24 @@ function Library:CreateWindow(...)
     local CursorHistory = {};
     local CursorHistoryCount = 0;
     if CustomCursorEnabled then
-        local CursorSize = Vector2.new(24, 28);
         CustomCursor = Library:Create('Frame', {
-            BackgroundTransparency = 1;
+            AnchorPoint = Vector2.new(0.5, 0.5);
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
             Position = UDim2.fromOffset(-100, -100);
-            Size = UDim2.fromOffset(CursorSize.X, CursorSize.Y);
+            Size = UDim2.fromOffset(6, 6);
             Visible = false;
             ZIndex = 300;
             Parent = ScreenGui;
         });
-
-        Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            Image = 'rbxasset://textures/ArrowCursor.png';
-            ImageColor3 = Color3.new(0, 0, 0);
-            ImageTransparency = 0.15;
-            Position = UDim2.fromOffset(2, 2);
-            Size = UDim2.fromOffset(22, 26);
-            ZIndex = 301;
+        Library:AddCorner(CustomCursor, 3);
+        Library:Create('UIStroke', {
+            Color = Library.BackgroundColor;
+            Thickness = 1;
             Parent = CustomCursor;
         });
-        Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            Image = 'rbxasset://textures/ArrowCursor.png';
-            ImageColor3 = Color3.new(1, 1, 1);
-            Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(22, 26);
-            ZIndex = 302;
-            Parent = CustomCursor;
+        Library:AddToRegistry(CustomCursor, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local TrailSizes = { 8, 7, 6, 5, 4 };
@@ -4123,21 +4113,15 @@ function Library:CreateWindow(...)
             CursorTrail[Index] = TrailDot;
         end;
 
-        local TrailAccumulator = 0;
-
-        Library:GiveSignal(RenderStepped:Connect(function(DeltaTime)
+        Library:GiveSignal(RenderStepped:Connect(function()
             if CustomCursor.Visible then
                 local MousePosition = GetMousePosition();
                 CustomCursor.Position = UDim2.fromOffset(MousePosition.X, MousePosition.Y);
-                TrailAccumulator = TrailAccumulator + DeltaTime;
-                if TrailAccumulator >= 0.025 then
-                    TrailAccumulator = 0;
-                    for Index = #CursorHistory, 2, -1 do
-                        CursorHistory[Index] = CursorHistory[Index - 1];
-                    end;
-                    CursorHistory[1] = MousePosition;
-                    CursorHistoryCount = math.min(CursorHistoryCount + 1, #CursorHistory);
+                for Index = #CursorHistory, 2, -1 do
+                    CursorHistory[Index] = CursorHistory[Index - 1];
                 end;
+                CursorHistory[1] = MousePosition;
+                CursorHistoryCount = math.min(CursorHistoryCount + 1, #CursorHistory);
 
                 for Index, TrailDot in ipairs(CursorTrail) do
                     TrailDot.Position = UDim2.fromOffset(CursorHistory[Index].X, CursorHistory[Index].Y);
