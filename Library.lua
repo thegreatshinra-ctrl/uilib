@@ -1488,6 +1488,138 @@ do
         return Label;
     end;
 
+    function Funcs:AddTable(Info)
+        assert(type(Info) == 'table', 'AddTable: `Info` must be a table.');
+        assert(type(Info.Columns) == 'table' and #Info.Columns >= 2, 'AddTable: `Columns` must contain at least two column names.');
+
+        for _, Column in ipairs(Info.Columns) do
+            assert(type(Column) == 'string', 'AddTable: column names must be strings.');
+        end;
+
+        local Groupbox = self;
+        local ColumnCount = #Info.Columns;
+        local RowHeight = 20;
+        local TableWidget = {
+            Columns = Info.Columns;
+            RowFrames = {};
+        };
+
+        local TableFrame = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, -4, 0, RowHeight);
+            ZIndex = 5;
+            Parent = Groupbox.Container;
+        });
+
+        local Header = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Size = UDim2.new(1, 0, 0, RowHeight);
+            ZIndex = 5;
+            Parent = TableFrame;
+        });
+        Library:AddCorner(Header, 4);
+        Library:AddToRegistry(Header, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        local function CreateCells(Parent, Values, IsHeader)
+            local Cells = {};
+
+            for Index, Column in ipairs(Info.Columns) do
+                local Value = IsHeader and Column or Values[Column];
+                if Value == nil and not IsHeader then
+                    Value = Values[Index];
+                end;
+
+                local PositionScale = (Index - 1) / ColumnCount;
+                local IsFirst = Index == 1;
+                local IsLast = Index == ColumnCount;
+                local Cell = Library:CreateLabel({
+                    BackgroundTransparency = 1;
+                    Position = UDim2.new(PositionScale, IsFirst and 6 or 0, 0, 0);
+                    Size = UDim2.new(1 / ColumnCount, IsLast and -6 or -4, 1, 0);
+                    Text = Value == nil and '' or tostring(Value);
+                    TextSize = 13;
+                    TextXAlignment = IsFirst and Enum.TextXAlignment.Left or (IsLast and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center);
+                    TextTruncate = Enum.TextTruncate.AtEnd;
+                    ZIndex = 6;
+                    Parent = Parent;
+                });
+
+                if IsHeader then
+                    Cell.TextColor3 = Library.AccentColor;
+                    Library:RemoveFromRegistry(Cell);
+                    Library:AddToRegistry(Cell, { TextColor3 = 'AccentColor' });
+                end;
+
+                table.insert(Cells, Cell);
+            end;
+
+            return Cells;
+        end;
+
+        CreateCells(Header, {}, true);
+
+        function TableWidget:ClearRows()
+            for _, Row in ipairs(self.RowFrames) do
+                for _, Cell in ipairs(Row.Cells) do
+                    Library:RemoveFromRegistry(Cell);
+                end;
+                Library:RemoveFromRegistry(Row.Frame);
+                Row.Frame:Destroy();
+            end;
+
+            table.clear(self.RowFrames);
+            TableFrame.Size = UDim2.new(1, -4, 0, RowHeight);
+            Groupbox:Resize();
+        end;
+
+        function TableWidget:AddRow(Values)
+            assert(type(Values) == 'table', 'AddRow: row values must be a table.');
+
+            local RowIndex = #self.RowFrames + 1;
+            local RowFrame = Library:Create('Frame', {
+                BackgroundColor3 = RowIndex % 2 == 0 and Library.MainColor or Library.BackgroundColor;
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(0, RowHeight * RowIndex);
+                Size = UDim2.new(1, 0, 0, RowHeight);
+                ZIndex = 5;
+                Parent = TableFrame;
+            });
+            Library:AddToRegistry(RowFrame, {
+                BackgroundColor3 = RowIndex % 2 == 0 and 'MainColor' or 'BackgroundColor';
+            });
+
+            local Cells = CreateCells(RowFrame, Values, false);
+            table.insert(self.RowFrames, {
+                Frame = RowFrame;
+                Cells = Cells;
+            });
+
+            TableFrame.Size = UDim2.new(1, -4, 0, RowHeight * (#self.RowFrames + 1));
+            Groupbox:Resize();
+            return self;
+        end;
+
+        function TableWidget:SetRows(Rows)
+            assert(type(Rows) == 'table', 'SetRows: rows must be a table.');
+
+            self:ClearRows();
+            for _, Row in ipairs(Rows) do
+                self:AddRow(Row);
+            end;
+
+            return self;
+        end;
+
+        Groupbox:AddBlank(5);
+        Groupbox:Resize();
+        TableWidget:SetRows(Info.Rows or {});
+        return TableWidget;
+    end;
+
     function Funcs:AddButton(...)
         -- TODO: Eventually redo this
         local Button = {};
