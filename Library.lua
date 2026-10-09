@@ -46,6 +46,7 @@ for _, ExistingGui in next, PreviousScreenGuis do
     ExistingGui:Destroy();
 end;
 
+local PreviousMouseIconEnabled = InputService.MouseIconEnabled;
 local ScreenGui = Instance.new('ScreenGui');
 ScreenGui.Name = ScreenGuiName;
 ProtectGui(ScreenGui);
@@ -503,6 +504,7 @@ function Library:Unload()
         Library.BackgroundBlurEffect = nil;
     end;
 
+    InputService.MouseIconEnabled = PreviousMouseIconEnabled;
     ScreenGui:Destroy()
 end
 
@@ -4064,6 +4066,52 @@ function Library:CreateWindow(...)
     local Fading = false;
     local WindowScaleTween;
     local BackgroundBlurEffect;
+    local CustomCursorEnabled = Config.CustomCursor ~= false;
+    local CustomCursor;
+    if CustomCursorEnabled then
+        CustomCursor = Library:Create('Frame', {
+            AnchorPoint = Vector2.new(0.5, 0.5);
+            BackgroundColor3 = Library.BackgroundColor;
+            BackgroundTransparency = 0.15;
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(-100, -100);
+            Size = UDim2.fromOffset(14, 14);
+            Visible = false;
+            ZIndex = 300;
+            Parent = ScreenGui;
+        });
+        Library:AddCorner(CustomCursor, 7);
+        Library:Create('UIStroke', {
+            Color = Library.FontColor;
+            Thickness = 1;
+            Parent = CustomCursor;
+        });
+        Library:AddToRegistry(CustomCursor, {
+            BackgroundColor3 = 'BackgroundColor';
+        });
+
+        local CursorDot = Library:Create('Frame', {
+            AnchorPoint = Vector2.new(0.5, 0.5);
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.fromScale(0.5, 0.5);
+            Size = UDim2.fromOffset(4, 4);
+            ZIndex = 301;
+            Parent = CustomCursor;
+        });
+        Library:AddCorner(CursorDot, 2);
+        Library:AddToRegistry(CursorDot, {
+            BackgroundColor3 = 'AccentColor';
+        });
+
+        Library:GiveSignal(RenderStepped:Connect(function()
+            if CustomCursor.Visible then
+                local MousePosition = GetMousePosition();
+                CustomCursor.Position = UDim2.fromOffset(MousePosition.X, MousePosition.Y);
+            end;
+        end));
+    end;
+
     if Config.BackgroundBlur then
         BackgroundBlurEffect = Instance.new('BlurEffect');
         BackgroundBlurEffect.Name = 'LinoriaLibraryBackgroundBlur';
@@ -4082,6 +4130,14 @@ function Library:CreateWindow(...)
         Fading = true;
         Toggled = (not Toggled);
         ModalElement.Modal = Toggled;
+        if CustomCursor then
+            CustomCursor.Visible = Toggled;
+            if Toggled then
+                InputService.MouseIconEnabled = false;
+            else
+                InputService.MouseIconEnabled = PreviousMouseIconEnabled;
+            end;
+        end;
 
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
