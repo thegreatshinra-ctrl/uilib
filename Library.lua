@@ -3891,7 +3891,7 @@ function Library:CreateWindow(...)
             local GroupboxDivider = Library:Create('Frame', {
                 BackgroundColor3 = Library.OutlineColor;
                 BorderSizePixel = 0;
-                Position = UDim2.new(0, 8, 0, 24);
+                Position = UDim2.new(0, 8, 0, 27);
                 Size = UDim2.new(1, -16, 0, 1);
                 ZIndex = 5;
                 Parent = BoxInner;
@@ -3918,8 +3918,8 @@ function Library:CreateWindow(...)
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
-                Position = UDim2.new(0, 7, 0, 28);
-                Size = UDim2.new(1, -7, 1, -28);
+                Position = UDim2.new(0, 7, 0, 36);
+                Size = UDim2.new(1, -7, 1, -36);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
@@ -3939,7 +3939,7 @@ function Library:CreateWindow(...)
                     end;
                 end;
 
-                BoxOuter.Size = UDim2.new(1, 0, 0, 28 + Size + 2 + 2);
+                BoxOuter.Size = UDim2.new(1, 0, 0, 36 + Size + 2 + 2);
             end;
 
             Groupbox.Container = Container;
