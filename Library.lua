@@ -352,11 +352,7 @@ function Library:OnHighlight(HighlightInstance, HighlightedInstance, Properties,
         Color = 'AccentColor';
     });
 
-    local HoverScale = Instance.new('UIScale');
-    HoverScale.Scale = 1;
-    HoverScale.Parent = HighlightedInstance;
     local StrokeTween;
-    local ScaleTween;
 
     HighlightInstance.MouseEnter:Connect(function()
         local Reg = Library.RegistryMap[HighlightedInstance];
@@ -372,21 +368,12 @@ function Library:OnHighlight(HighlightInstance, HighlightedInstance, Properties,
         if StrokeTween then
             StrokeTween:Cancel();
         end;
-        if ScaleTween then
-            ScaleTween:Cancel();
-        end;
         StrokeTween = TweenService:Create(
             HoverStroke,
             TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
             { Transparency = 0.12 }
         );
-        ScaleTween = TweenService:Create(
-            HoverScale,
-            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-            { Scale = 1.04 }
-        );
         StrokeTween:Play();
-        ScaleTween:Play();
     end)
 
     HighlightInstance.MouseLeave:Connect(function()
@@ -403,21 +390,12 @@ function Library:OnHighlight(HighlightInstance, HighlightedInstance, Properties,
         if StrokeTween then
             StrokeTween:Cancel();
         end;
-        if ScaleTween then
-            ScaleTween:Cancel();
-        end;
         StrokeTween = TweenService:Create(
             HoverStroke,
             TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             { Transparency = 1 }
         );
-        ScaleTween = TweenService:Create(
-            HoverScale,
-            TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            { Scale = 1 }
-        );
         StrokeTween:Play();
-        ScaleTween:Play();
     end)
 end;
 
@@ -2234,21 +2212,6 @@ do
             { BorderColor3 = 'Black' }
         );
 
-        local ToggleLabelRegistry = Library.RegistryMap[ToggleLabel];
-        ToggleRegion.MouseEnter:Connect(function()
-            ToggleLabel.TextColor3 = Library.AccentColor;
-            if ToggleLabelRegistry then
-                ToggleLabelRegistry.Properties.TextColor3 = 'AccentColor';
-            end;
-        end);
-        ToggleRegion.MouseLeave:Connect(function()
-            local TextColor = Toggle.Risky and Library.RiskColor or Library.FontColor;
-            ToggleLabel.TextColor3 = TextColor;
-            if ToggleLabelRegistry then
-                ToggleLabelRegistry.Properties.TextColor3 = Toggle.Risky and 'RiskColor' or 'FontColor';
-            end;
-        end);
-
         function Toggle:UpdateColors()
             Toggle:Display();
         end;
@@ -3165,28 +3128,21 @@ do
         BorderColor3 = 'OutlineColor';
     }, true);
 
-    local HeaderIcon = Library:Create('Frame', {
-        BackgroundColor3 = Library.OutlineColor;
-        BorderSizePixel = 0;
-        Position = UDim2.fromOffset(10, 8);
-        Size = UDim2.fromOffset(13, 11);
-        ZIndex = 103;
+    local KeybindIconImage, KeybindIconRectSize, KeybindIconRectOffset = Library:GetIconAsset('keyboard');
+    local KeybindIcon = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = KeybindIconImage;
+        ImageRectSize = KeybindIconRectSize;
+        ImageRectOffset = KeybindIconRectOffset;
+        ImageColor3 = Library.FontColor;
+        Position = UDim2.fromOffset(9, 7);
+        Size = UDim2.fromOffset(14, 14);
+        ZIndex = 104;
         Parent = KeybindInner;
     });
-    Library:AddCorner(HeaderIcon, 3);
-
-    for Index = 0, 2 do
-        local KeyDot = Library:Create('Frame', {
-            BackgroundColor3 = Library.FontColor;
-            BackgroundTransparency = 0.15;
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(3 + Index * 3, 3);
-            Size = UDim2.fromOffset(2, 2);
-            ZIndex = 104;
-            Parent = HeaderIcon;
-        });
-        Library:AddCorner(KeyDot, 1);
-    end;
+    Library:AddToRegistry(KeybindIcon, {
+        ImageColor3 = 'FontColor';
+    }, true);
 
     local ColorFrame = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor;
