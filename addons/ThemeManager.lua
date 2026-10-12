@@ -18,10 +18,13 @@ local ThemeManager = {} do
 
 		local scheme = data[2]
 		for idx, col in next, customThemeData or scheme do
-			self.Library[idx] = Color3.fromHex(col)
+			local color = self.Library.IsOctober and idx == 'AccentColor'
+				and self.Library.OctoberAccentColor
+				or Color3.fromHex(col)
+			self.Library[idx] = color
 			
 			if Options[idx] then
-				Options[idx]:SetValueRGB(Color3.fromHex(col))
+				Options[idx]:SetValueRGB(color)
 			end
 		end
 

@@ -16,6 +16,8 @@ local function GetMousePosition()
 end;
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
+local IsOctober = os.date('*t').month == 10;
+local OctoberAccentColor = Color3.fromRGB(255, 145, 45);
 
 local ScreenGuiName = 'LinoriaLibraryScreenGui';
 local PreviousLibrary = getgenv().Library;
@@ -72,7 +74,9 @@ local Library = {
     FontColor = Color3.fromRGB(174, 176, 181);
     MainColor = Color3.fromRGB(12, 13, 15);
     BackgroundColor = Color3.fromRGB(7, 8, 10);
-    AccentColor = Color3.fromRGB(255, 255, 255);
+    AccentColor = IsOctober and OctoberAccentColor or Color3.fromRGB(255, 255, 255);
+    OctoberAccentColor = OctoberAccentColor;
+    IsOctober = IsOctober;
     OutlineColor = Color3.fromRGB(20, 21, 24);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
@@ -3402,7 +3406,7 @@ function Library:CreateWindow(...)
         });
 
         for _ = 1, 42 do
-            local Size = SnowRandomizer:NextInteger(10, 22);
+            local Size = SnowRandomizer:NextInteger(IsOctober and 18 or 10, IsOctober and 26 or 22);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3418,33 +3422,72 @@ function Library:CreateWindow(...)
             SnowflakeScales[Flake] = FlakeScale;
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
 
-            local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
-            for RayIndex = 0, 5 do
-                local Rotation = RayIndex * 60;
-                Library:Create('Frame', {
+            if IsOctober then
+                local PumpkinBody = Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                    BackgroundTransparency = RayTransparency;
+                    BackgroundColor3 = OctoberAccentColor;
                     BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.5);
-                    Rotation = Rotation;
-                    Size = UDim2.new(0, 1, 0.88, 0);
+                    Position = UDim2.fromScale(0.5, 0.62);
+                    Size = UDim2.fromScale(0.86, 0.68);
                     ZIndex = 1;
                     Parent = Flake;
                 });
+                Library:AddCorner(PumpkinBody, 100);
 
-                for _, Branch in next, { -35, 35 } do
-                    Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 1);
-                        BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                        BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
+                for _, StripeX in next, { 0.36, 0.64 } do
+                    local Stripe = Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        BackgroundColor3 = Color3.fromRGB(205, 91, 24);
+                        BackgroundTransparency = 0.25;
                         BorderSizePixel = 0;
-                        Position = UDim2.new(0.5, 0, 0.32, 0);
-                        Rotation = Rotation + Branch;
-                        Size = UDim2.new(0, 1, 0.28, 0);
+                        Position = UDim2.fromScale(StripeX, 0.62);
+                        Size = UDim2.fromScale(0.07, 0.54);
                         ZIndex = 1;
                         Parent = Flake;
                     });
+                    Library:AddCorner(Stripe, 100);
+                end;
+
+                local Stem = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(101, 75, 42);
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.2);
+                    Rotation = -12;
+                    Size = UDim2.fromScale(0.16, 0.26);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(Stem, 3);
+            else
+                local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
+                for RayIndex = 0, 5 do
+                    local Rotation = RayIndex * 60;
+                    Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                        BackgroundTransparency = RayTransparency;
+                        BorderSizePixel = 0;
+                        Position = UDim2.fromScale(0.5, 0.5);
+                        Rotation = Rotation;
+                        Size = UDim2.new(0, 1, 0.88, 0);
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
+
+                    for _, Branch in next, { -35, 35 } do
+                        Library:Create('Frame', {
+                            AnchorPoint = Vector2.new(0.5, 1);
+                            BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                            BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
+                            BorderSizePixel = 0;
+                            Position = UDim2.new(0.5, 0, 0.32, 0);
+                            Rotation = Rotation + Branch;
+                            Size = UDim2.new(0, 1, 0.28, 0);
+                            ZIndex = 1;
+                            Parent = Flake;
+                        });
+                    end;
                 end;
             end;
 
