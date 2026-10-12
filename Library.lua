@@ -17,7 +17,7 @@ end;
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 local IsOctober = os.date('*t').month == 10;
-local OctoberAccentColor = Color3.fromRGB(255, 145, 45);
+local OctoberAccentColor = Color3.fromRGB(255, 126, 24);
 
 local ScreenGuiName = 'LinoriaLibraryScreenGui';
 local PreviousLibrary = getgenv().Library;
@@ -2228,9 +2228,15 @@ do
             Rotation = 0;
             Parent = ToggleInner;
         });
-
         Library:AddToRegistry(ToggleInner, {
             BackgroundColor3 = Color3.fromRGB(25, 26, 29);
+        });
+        Library:AddToRegistry(ToggleGradient, {
+            Color = function()
+                return Toggle.Value
+                    and ColorSequence.new(Library.AccentColor, Library.AccentColorDark)
+                    or ColorSequence.new(Color3.new(1, 1, 1))
+            end;
         });
 
         local ToggleLabel = Library:CreateLabel({
@@ -2272,12 +2278,14 @@ do
         end
 
         function Toggle:Display()
-            ToggleInner.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Color3.fromRGB(25, 26, 29);
+            ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Color3.fromRGB(25, 26, 29);
             ToggleGradient.Color = Toggle.Value
-                and ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(175, 175, 175))
+                and ColorSequence.new(Library.AccentColor, Library.AccentColorDark)
                 or ColorSequence.new(Color3.new(1, 1, 1));
 
-            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and Color3.new(1, 1, 1) or Color3.fromRGB(25, 26, 29);
+            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value
+                and 'AccentColor'
+                or Color3.fromRGB(25, 26, 29);
         end;
 
         function Toggle:OnChanged(Func)
@@ -2386,7 +2394,7 @@ do
         Library:AddCorner(SliderInner, 4);
 
         local Fill = Library:Create('Frame', {
-            BackgroundColor3 = Color3.fromRGB(235, 235, 237);
+            BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
@@ -2394,10 +2402,16 @@ do
         });
         Library:AddCorner(Fill, 4);
 
-        Library:Create('UIGradient', {
-            Color = ColorSequence.new(Color3.fromRGB(248, 248, 249), Color3.fromRGB(211, 212, 215));
+        local FillGradient = Library:Create('UIGradient', {
+            Color = ColorSequence.new(Library.AccentColor, Library.AccentColorDark);
             Rotation = 0;
             Parent = Fill;
+        });
+        Library:AddToRegistry(Fill, { BackgroundColor3 = 'AccentColor' });
+        Library:AddToRegistry(FillGradient, {
+            Color = function()
+                return ColorSequence.new(Library.AccentColor, Library.AccentColorDark)
+            end;
         });
 
         local DisplayLabel = Library:CreateLabel({
@@ -2421,7 +2435,8 @@ do
         end
 
         function Slider:UpdateColors()
-            Fill.BackgroundColor3 = Color3.new(1, 1, 1);
+            Fill.BackgroundColor3 = Library.AccentColor;
+            FillGradient.Color = ColorSequence.new(Library.AccentColor, Library.AccentColorDark);
         end;
 
         function Slider:Display()
@@ -3395,6 +3410,9 @@ function Library:CreateWindow(...)
     local SnowfallTweens = {};
     local SnowfallTwinkleTweens = {};
     local SnowfallGeneration = 0;
+    local PumpkinPhysics = {};
+    local PumpkinVisuals = {};
+    local PumpkinPhysicsConnection;
     local SnowRandomizer = Random.new();
     if Config.Snowfall then
         SnowfallLayer = Library:Create('Frame', {
@@ -3405,8 +3423,8 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, 42 do
-            local Size = SnowRandomizer:NextInteger(IsOctober and 18 or 10, IsOctober and 26 or 22);
+        for _ = 1, IsOctober and 26 or 42 do
+            local Size = SnowRandomizer:NextInteger(IsOctober and 46 or 10, IsOctober and 62 or 22);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3423,42 +3441,175 @@ function Library:CreateWindow(...)
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
 
             if IsOctober then
+                local Glow = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(255, 133, 34);
+                    BackgroundTransparency = 0.74;
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.58);
+                    Size = UDim2.fromScale(1.08, 0.86);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(Glow, 100);
+                local PumpkinStroke = Instance.new('UIStroke');
+                PumpkinStroke.Color = Color3.fromRGB(255, 188, 89);
+                PumpkinStroke.Thickness = 1.8;
+                PumpkinStroke.Transparency = 0.06;
+                PumpkinStroke.Parent = Glow;
+
+                for _, Lobe in ipairs({
+                    { X = 0.29, Width = 0.42, Color = Color3.fromRGB(217, 86, 17) },
+                    { X = 0.71, Width = 0.42, Color = Color3.fromRGB(242, 112, 24) },
+                }) do
+                    local PumpkinLobe = Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        BackgroundColor3 = Lobe.Color;
+                        BorderSizePixel = 0;
+                        Position = UDim2.fromScale(Lobe.X, 0.62);
+                        Size = UDim2.fromScale(Lobe.Width, 0.66);
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
+                    Library:AddCorner(PumpkinLobe, 100);
+                end;
+
                 local PumpkinBody = Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = OctoberAccentColor;
+                    BackgroundColor3 = Color3.fromRGB(255, 138, 25);
                     BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.62);
-                    Size = UDim2.fromScale(0.86, 0.68);
+                    Position = UDim2.fromScale(0.5, 0.6);
+                    Size = UDim2.fromScale(0.57, 0.76);
                     ZIndex = 1;
                     Parent = Flake;
                 });
                 Library:AddCorner(PumpkinBody, 100);
+                local BodyStroke = Instance.new('UIStroke');
+                BodyStroke.Color = Color3.fromRGB(255, 186, 74);
+                BodyStroke.Thickness = 1.1;
+                BodyStroke.Transparency = 0.08;
+                BodyStroke.Parent = PumpkinBody;
+                Library:Create('UIGradient', {
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 190, 58));
+                        ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 132, 22));
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(191, 62, 13));
+                    });
+                    Rotation = 90;
+                    Parent = PumpkinBody;
+                });
 
-                for _, StripeX in next, { 0.36, 0.64 } do
-                    local Stripe = Library:Create('Frame', {
+                for _, RibX in next, { 0.34, 0.42, 0.5, 0.58, 0.66 } do
+                    local Rib = Library:Create('Frame', {
                         AnchorPoint = Vector2.new(0.5, 0.5);
-                        BackgroundColor3 = Color3.fromRGB(205, 91, 24);
-                        BackgroundTransparency = 0.25;
+                        BackgroundColor3 = Color3.fromRGB(179, 74, 18);
+                        BackgroundTransparency = 0.34;
                         BorderSizePixel = 0;
-                        Position = UDim2.fromScale(StripeX, 0.62);
-                        Size = UDim2.fromScale(0.07, 0.54);
+                        Position = UDim2.fromScale(RibX, 0.61);
+                        Size = UDim2.fromScale(0.026, 0.58);
                         ZIndex = 1;
                         Parent = Flake;
                     });
-                    Library:AddCorner(Stripe, 100);
+                    Library:AddCorner(Rib, 100);
+                end;
+
+                for _, Eye in ipairs({
+                    { X = 0.39, Rotation = -45 },
+                    { X = 0.61, Rotation = 45 },
+                }) do
+                    local EyeCutout = Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        BackgroundColor3 = Color3.fromRGB(91, 38, 11);
+                        BorderSizePixel = 0;
+                        Position = UDim2.fromScale(Eye.X, 0.52);
+                        Rotation = Eye.Rotation;
+                        Size = UDim2.fromScale(0.15, 0.21);
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
+                    Library:AddCorner(EyeCutout, 2);
+                end;
+
+                local NoseCutout = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(91, 38, 11);
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.66);
+                    Rotation = 45;
+                    Size = UDim2.fromScale(0.1, 0.12);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(NoseCutout, 2);
+
+                local Smile = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(91, 38, 11);
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.78);
+                    Size = UDim2.fromScale(0.4, 0.15);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(Smile, 4);
+                for _, ToothX in ipairs({ 0.39, 0.5, 0.61 }) do
+                    Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0);
+                        BackgroundColor3 = Color3.fromRGB(255, 191, 76);
+                        BorderSizePixel = 0;
+                        Position = UDim2.fromScale(ToothX, 0.74);
+                        Size = UDim2.fromScale(0.05, 0.075);
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
                 end;
 
                 local Stem = Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(101, 75, 42);
+                    BackgroundColor3 = Color3.fromRGB(96, 65, 30);
                     BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.2);
-                    Rotation = -12;
-                    Size = UDim2.fromScale(0.16, 0.26);
+                    Position = UDim2.fromScale(0.5, 0.18);
+                    Rotation = -14;
+                    Size = UDim2.fromScale(0.15, 0.3);
                     ZIndex = 1;
                     Parent = Flake;
                 });
                 Library:AddCorner(Stem, 3);
+
+                local Leaf = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = Color3.fromRGB(94, 139, 51);
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.63, 0.24);
+                    Rotation = 28;
+                    Size = UDim2.fromScale(0.23, 0.12);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(Leaf, 100);
+                local CollisionSparks = {};
+                for SparkIndex = 1, 6 do
+                    local Spark = Library:Create('Frame', {
+                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        BackgroundColor3 = Color3.fromRGB(255, 218, 132);
+                        BackgroundTransparency = 1;
+                        BorderSizePixel = 0;
+                        Position = UDim2.fromScale(0.5, 0.5);
+                        Rotation = SparkIndex * 30;
+                        Size = UDim2.fromScale(0.05, 0.2);
+                        Visible = false;
+                        ZIndex = 1;
+                        Parent = Flake;
+                    });
+                    Library:AddCorner(Spark, 100);
+                    table.insert(CollisionSparks, Spark);
+                end;
+                PumpkinVisuals[Flake] = {
+                    Stroke = PumpkinStroke;
+                    BodyStroke = BodyStroke;
+                    Glow = Glow;
+                    Sparks = CollisionSparks;
+                };
             else
                 local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
                 for RayIndex = 0, 5 do
@@ -3496,6 +3647,10 @@ function Library:CreateWindow(...)
 
         Library.SnowfallCleanup = function()
             SnowfallGeneration = SnowfallGeneration + 1;
+            if PumpkinPhysicsConnection then
+                PumpkinPhysicsConnection:Disconnect();
+                PumpkinPhysicsConnection = nil;
+            end;
             for Flake, FallTween in next, SnowfallTweens do
                 FallTween:Cancel();
                 SnowfallTweens[Flake] = nil;
@@ -3579,7 +3734,7 @@ function Library:CreateWindow(...)
     local HeaderLeftPadding = 47;
     local TitleIconBadge = Library:Create('Frame', {
         BackgroundColor3 = Library.AccentColor;
-        BackgroundTransparency = 0.88;
+        BackgroundTransparency = 1;
         BorderSizePixel = 0;
         Position = UDim2.fromOffset(11, 4);
         Size = UDim2.fromOffset(26, 24);
@@ -4337,51 +4492,203 @@ function Library:CreateWindow(...)
             SnowfallLayer.Visible = Toggled;
 
             if Toggled then
-                for _, Flake in next, Snowflakes do
-                    Flake.Visible = true;
-                    local FlakeScale = SnowflakeScales[Flake];
-                    local BaseScale = SnowflakeBaseScales[Flake];
-                    FlakeScale.Scale = BaseScale;
-                    local TwinkleTween = TweenService:Create(
-                        FlakeScale,
-                        TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
-                    );
-                    SnowfallTwinkleTweens[Flake] = TwinkleTween;
-                    TwinkleTween:Play();
-                    task.spawn(function()
-                        local FirstFall = true;
-                        while Generation == SnowfallGeneration and Toggled do
-                            local StartX = SnowRandomizer:NextNumber(0, 1);
-                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
-                            local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
-                            Flake.Position = UDim2.fromScale(StartX, StartY);
-                            Flake.Rotation = 0;
-                            local FallTween = TweenService:Create(
-                                Flake,
-                                TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
-                                {
-                                    Position = UDim2.fromScale(EndX, 1.08);
-                                    Rotation = SnowRandomizer:NextNumber(-180, 180);
-                                }
-                            );
-                            SnowfallTweens[Flake] = FallTween;
-                            FallTween:Play();
-                            FallTween.Completed:Wait();
-                            if SnowfallTweens[Flake] == FallTween then
-                                SnowfallTweens[Flake] = nil;
-                            end;
-                            if Generation ~= SnowfallGeneration or not Toggled then
-                                break;
-                            end;
-                            FirstFall = false;
+                if IsOctober then
+                    local LayerSize = SnowfallLayer.AbsoluteSize;
+                    if LayerSize.X <= 0 or LayerSize.Y <= 0 then
+                        local Camera = workspace.CurrentCamera;
+                        LayerSize = Camera and Camera.ViewportSize or Vector2.new(1280, 720);
+                    end;
+
+                    local PumpkinStates = {};
+                    for _, Pumpkin in next, Snowflakes do
+                        Pumpkin.Visible = true;
+                        local Radius = Pumpkin.AbsoluteSize.X * 0.42;
+                        if Radius <= 0 then
+                            Radius = Pumpkin.Size.X.Offset * 0.42;
                         end;
-                        if Generation == SnowfallGeneration then
-                            Flake.Visible = false;
+                        local State = {
+                            Position = Vector2.new(
+                                SnowRandomizer:NextNumber(Radius, math.max(Radius, LayerSize.X - Radius)),
+                                SnowRandomizer:NextNumber(-Radius, LayerSize.Y + Radius)
+                            );
+                            Velocity = Vector2.new(
+                                SnowRandomizer:NextNumber(-22, 22),
+                                SnowRandomizer:NextNumber(10, 32)
+                            );
+                            Radius = Radius;
+                            Rotation = SnowRandomizer:NextNumber(0, math.pi * 2);
+                            AngularVelocity = SnowRandomizer:NextNumber(-1.8, 1.8);
+                            PulsePhase = SnowRandomizer:NextNumber(0, math.pi * 2);
+                            Impact = 0;
+                            BaseScale = SnowflakeBaseScales[Pumpkin];
+                        };
+                        PumpkinPhysics[Pumpkin] = State;
+                        table.insert(PumpkinStates, { Frame = Pumpkin, State = State });
+                    end;
+
+                    PumpkinPhysicsConnection = RenderStepped:Connect(function(DeltaTime)
+                        if Generation ~= SnowfallGeneration or not Toggled then
+                            return;
+                        end;
+
+                        local ScreenSize = SnowfallLayer.AbsoluteSize;
+                        if ScreenSize.X <= 0 or ScreenSize.Y <= 0 then
+                            return;
+                        end;
+                        local Dt = math.min(DeltaTime, 0.05);
+                        local Now = os.clock();
+
+                        for _, Entry in ipairs(PumpkinStates) do
+                            local State = Entry.State;
+                            State.Velocity += Vector2.new(math.sin(Now * 0.55 + State.PulsePhase) * 5, 18) * Dt;
+                            State.Velocity *= math.max(0, 1 - Dt * 0.025);
+                            State.Position += State.Velocity * Dt;
+                            State.Rotation += State.AngularVelocity * Dt;
+                            State.AngularVelocity *= math.max(0, 1 - Dt * 0.12);
+                            State.Impact = math.max(0, State.Impact - Dt * 2.4);
+
+                            if State.Position.X < State.Radius then
+                                State.Position = Vector2.new(State.Radius, State.Position.Y);
+                                State.Velocity = Vector2.new(math.abs(State.Velocity.X) * 0.82, State.Velocity.Y);
+                                State.AngularVelocity += State.Velocity.Y * 0.002;
+                                State.Impact = 1;
+                            elseif State.Position.X > ScreenSize.X - State.Radius then
+                                State.Position = Vector2.new(ScreenSize.X - State.Radius, State.Position.Y);
+                                State.Velocity = Vector2.new(-math.abs(State.Velocity.X) * 0.82, State.Velocity.Y);
+                                State.AngularVelocity -= State.Velocity.Y * 0.002;
+                                State.Impact = 1;
+                            end;
+
+                            if State.Position.Y > ScreenSize.Y + State.Radius then
+                                State.Position = Vector2.new(
+                                    SnowRandomizer:NextNumber(State.Radius, math.max(State.Radius, ScreenSize.X - State.Radius)),
+                                    -State.Radius
+                                );
+                                State.Velocity = Vector2.new(
+                                    SnowRandomizer:NextNumber(-22, 22),
+                                    SnowRandomizer:NextNumber(10, 32)
+                                );
+                            end;
+                        end;
+
+                        for FirstIndex = 1, #PumpkinStates - 1 do
+                            local First = PumpkinStates[FirstIndex].State;
+                            for SecondIndex = FirstIndex + 1, #PumpkinStates do
+                                local Second = PumpkinStates[SecondIndex].State;
+                                local Separation = Second.Position - First.Position;
+                                local Distance = Separation.Magnitude;
+                                local MinimumDistance = First.Radius + Second.Radius;
+                                if Distance < MinimumDistance then
+                                    local Normal = Distance > 0.001
+                                        and Separation / Distance
+                                        or Vector2.new(1, 0);
+                                    local Overlap = MinimumDistance - Distance;
+                                    First.Position -= Normal * (Overlap * 0.5);
+                                    Second.Position += Normal * (Overlap * 0.5);
+
+                                    local RelativeVelocity = Second.Velocity - First.Velocity;
+                                    local NormalSpeed = RelativeVelocity:Dot(Normal);
+                                    if NormalSpeed < 0 then
+                                        local Impulse = -(1 + 0.78) * NormalSpeed * 0.5;
+                                        First.Velocity -= Normal * Impulse;
+                                        Second.Velocity += Normal * Impulse;
+                                        First.AngularVelocity -= Normal.Y * Impulse * 0.08;
+                                        Second.AngularVelocity += Normal.Y * Impulse * 0.08;
+                                        First.Velocity += Vector2.new(-Normal.Y, Normal.X) * Impulse * 0.16;
+                                        Second.Velocity -= Vector2.new(-Normal.Y, Normal.X) * Impulse * 0.16;
+                                        First.Impact = 1;
+                                        Second.Impact = 1;
+                                    end;
+                                end;
+                            end;
+                        end;
+
+                        for _, Entry in ipairs(PumpkinStates) do
+                            local Pumpkin = Entry.Frame;
+                            local State = Entry.State;
+                            Pumpkin.Position = UDim2.fromOffset(State.Position.X, State.Position.Y);
+                            Pumpkin.Rotation = math.deg(State.Rotation);
+                            SnowflakeScales[Pumpkin].Scale = State.BaseScale
+                                * (1 + math.sin(Now * 2.2 + State.PulsePhase) * 0.035 + State.Impact * 0.12);
+                            local Visual = PumpkinVisuals[Pumpkin];
+                            if Visual then
+                                if Visual.Stroke then
+                                    Visual.Stroke.Transparency = 0.06 + (1 - State.Impact) * 0.68;
+                                end;
+                                if Visual.BodyStroke then
+                                    Visual.BodyStroke.Transparency = 0.08 + (1 - State.Impact) * 0.48;
+                                end;
+                                if Visual.Glow then
+                                    Visual.Glow.BackgroundTransparency = 0.74 + (1 - State.Impact) * 0.2;
+                                end;
+                                if Visual.Sparks then
+                                    for SparkIndex, Spark in ipairs(Visual.Sparks) do
+                                        local SparkAngle = (SparkIndex / #Visual.Sparks) * math.pi * 2
+                                            + State.Rotation * 0.2;
+                                        local SparkDistance = 0.34 + (1 - State.Impact) * 0.28;
+                                        Spark.Position = UDim2.fromScale(
+                                            0.5 + math.cos(SparkAngle) * SparkDistance,
+                                            0.6 + math.sin(SparkAngle) * SparkDistance
+                                        );
+                                        Spark.Rotation = math.deg(SparkAngle) + 45;
+                                        Spark.BackgroundTransparency = 1 - State.Impact * 0.9;
+                                        Spark.Visible = State.Impact > 0.04;
+                                    end;
+                                end;
+                            end;
                         end;
                     end);
+                else
+                    for _, Flake in next, Snowflakes do
+                        Flake.Visible = true;
+                        local FlakeScale = SnowflakeScales[Flake];
+                        local BaseScale = SnowflakeBaseScales[Flake];
+                        FlakeScale.Scale = BaseScale;
+                        local TwinkleTween = TweenService:Create(
+                            FlakeScale,
+                            TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                            { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
+                        );
+                        SnowfallTwinkleTweens[Flake] = TwinkleTween;
+                        TwinkleTween:Play();
+                        task.spawn(function()
+                            local FirstFall = true;
+                            while Generation == SnowfallGeneration and Toggled do
+                                local StartX = SnowRandomizer:NextNumber(0, 1);
+                                local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
+                                local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
+                                Flake.Position = UDim2.fromScale(StartX, StartY);
+                                Flake.Rotation = 0;
+                                local FallTween = TweenService:Create(
+                                    Flake,
+                                    TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
+                                    {
+                                        Position = UDim2.fromScale(EndX, 1.08);
+                                        Rotation = SnowRandomizer:NextNumber(-180, 180);
+                                    }
+                                );
+                                SnowfallTweens[Flake] = FallTween;
+                                FallTween:Play();
+                                FallTween.Completed:Wait();
+                                if SnowfallTweens[Flake] == FallTween then
+                                    SnowfallTweens[Flake] = nil;
+                                end;
+                                if Generation ~= SnowfallGeneration or not Toggled then
+                                    break;
+                                end;
+                                FirstFall = false;
+                            end;
+                            if Generation == SnowfallGeneration then
+                                Flake.Visible = false;
+                            end;
+                        end);
+                    end;
                 end;
             else
+                if PumpkinPhysicsConnection then
+                    PumpkinPhysicsConnection:Disconnect();
+                    PumpkinPhysicsConnection = nil;
+                end;
                 for Flake, FallTween in next, SnowfallTweens do
                     FallTween:Cancel();
                     SnowfallTweens[Flake] = nil;
@@ -4394,6 +4701,7 @@ function Library:CreateWindow(...)
                 for _, Flake in next, Snowflakes do
                     Flake.Visible = false;
                 end;
+                table.clear(PumpkinPhysics);
             end;
         end;
 
