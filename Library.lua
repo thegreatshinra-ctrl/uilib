@@ -152,6 +152,12 @@ function Library:SetIconProvider(Provider)
     end;
 end;
 
+Library:SetIconProvider(
+    loadstring(game:HttpGet(
+        'https://github.com/latte-soft/lucide-roblox/releases/download/0.1.3/lucide-roblox.luau'
+    ))()
+);
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -3423,8 +3429,8 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, IsOctober and 26 or 42 do
-            local Size = SnowRandomizer:NextInteger(IsOctober and 46 or 10, IsOctober and 62 or 22);
+        for _ = 1, IsOctober and 56 or 42 do
+            local Size = SnowRandomizer:NextInteger(IsOctober and 18 or 10, IsOctober and 28 or 22);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3441,173 +3447,37 @@ function Library:CreateWindow(...)
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
 
             if IsOctober then
-                local Glow = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(255, 133, 34);
-                    BackgroundTransparency = 0.74;
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.58);
-                    Size = UDim2.fromScale(1.08, 0.86);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(Glow, 100);
-                local PumpkinStroke = Instance.new('UIStroke');
-                PumpkinStroke.Color = Color3.fromRGB(255, 188, 89);
-                PumpkinStroke.Thickness = 1.8;
-                PumpkinStroke.Transparency = 0.06;
-                PumpkinStroke.Parent = Glow;
-
-                for _, Lobe in ipairs({
-                    { X = 0.29, Width = 0.42, Color = Color3.fromRGB(217, 86, 17) },
-                    { X = 0.71, Width = 0.42, Color = Color3.fromRGB(242, 112, 24) },
-                }) do
-                    local PumpkinLobe = Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0.5);
-                        BackgroundColor3 = Lobe.Color;
-                        BorderSizePixel = 0;
-                        Position = UDim2.fromScale(Lobe.X, 0.62);
-                        Size = UDim2.fromScale(Lobe.Width, 0.66);
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                    Library:AddCorner(PumpkinLobe, 100);
-                end;
-
-                local PumpkinBody = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(255, 138, 25);
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.6);
-                    Size = UDim2.fromScale(0.57, 0.76);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(PumpkinBody, 100);
-                local BodyStroke = Instance.new('UIStroke');
-                BodyStroke.Color = Color3.fromRGB(255, 186, 74);
-                BodyStroke.Thickness = 1.1;
-                BodyStroke.Transparency = 0.08;
-                BodyStroke.Parent = PumpkinBody;
-                Library:Create('UIGradient', {
-                    Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 190, 58));
-                        ColorSequenceKeypoint.new(0.52, Color3.fromRGB(255, 132, 22));
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(191, 62, 13));
-                    });
-                    Rotation = 90;
-                    Parent = PumpkinBody;
-                });
-
-                for _, RibX in next, { 0.34, 0.42, 0.5, 0.58, 0.66 } do
-                    local Rib = Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0.5);
-                        BackgroundColor3 = Color3.fromRGB(179, 74, 18);
-                        BackgroundTransparency = 0.34;
-                        BorderSizePixel = 0;
-                        Position = UDim2.fromScale(RibX, 0.61);
-                        Size = UDim2.fromScale(0.026, 0.58);
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                    Library:AddCorner(Rib, 100);
-                end;
-
-                for _, Eye in ipairs({
-                    { X = 0.39, Rotation = -45 },
-                    { X = 0.61, Rotation = 45 },
-                }) do
-                    local EyeCutout = Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0.5);
-                        BackgroundColor3 = Color3.fromRGB(91, 38, 11);
-                        BorderSizePixel = 0;
-                        Position = UDim2.fromScale(Eye.X, 0.52);
-                        Rotation = Eye.Rotation;
-                        Size = UDim2.fromScale(0.15, 0.21);
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                    Library:AddCorner(EyeCutout, 2);
-                end;
-
-                local NoseCutout = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(91, 38, 11);
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.66);
-                    Rotation = 45;
-                    Size = UDim2.fromScale(0.1, 0.12);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(NoseCutout, 2);
-
-                local Smile = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(91, 38, 11);
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.78);
-                    Size = UDim2.fromScale(0.4, 0.15);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(Smile, 4);
-                for _, ToothX in ipairs({ 0.39, 0.5, 0.61 }) do
-                    Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0);
-                        BackgroundColor3 = Color3.fromRGB(255, 191, 76);
-                        BorderSizePixel = 0;
-                        Position = UDim2.fromScale(ToothX, 0.74);
-                        Size = UDim2.fromScale(0.05, 0.075);
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                end;
-
-                local Stem = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(96, 65, 30);
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.18);
-                    Rotation = -14;
-                    Size = UDim2.fromScale(0.15, 0.3);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(Stem, 3);
-
-                local Leaf = Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(94, 139, 51);
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.63, 0.24);
-                    Rotation = 28;
-                    Size = UDim2.fromScale(0.23, 0.12);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-                Library:AddCorner(Leaf, 100);
                 local CollisionSparks = {};
-                for SparkIndex = 1, 6 do
-                    local Spark = Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0.5);
-                        BackgroundColor3 = Color3.fromRGB(255, 218, 132);
-                        BackgroundTransparency = 1;
-                        BorderSizePixel = 0;
-                        Position = UDim2.fromScale(0.5, 0.5);
-                        Rotation = SparkIndex * 30;
-                        Size = UDim2.fromScale(0.05, 0.2);
-                        Visible = false;
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                    Library:AddCorner(Spark, 100);
-                    table.insert(CollisionSparks, Spark);
-                end;
+                local PumpkinGlow = Library:Create('Frame', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundColor3 = OctoberAccentColor;
+                    BackgroundTransparency = 0.94;
+                    BorderSizePixel = 0;
+                    Position = UDim2.fromScale(0.5, 0.5);
+                    Size = UDim2.fromScale(1.2, 1.2);
+                    ZIndex = 1;
+                    Parent = Flake;
+                });
+                Library:AddCorner(PumpkinGlow, 100);
+                local GlowStroke = Instance.new('UIStroke');
+                GlowStroke.Color = OctoberAccentColor;
+                GlowStroke.Thickness = 1.4;
+                GlowStroke.Transparency = 1;
+                GlowStroke.Parent = PumpkinGlow;
+                local PumpkinImage = Library:Create('ImageLabel', {
+                    AnchorPoint = Vector2.new(0.5, 0.5);
+                    BackgroundTransparency = 1;
+                    Image = 'rbxassetid://94923281869963';
+                    ImageColor3 = OctoberAccentColor;
+                    Position = UDim2.fromScale(0.5, 0.5);
+                    ScaleType = Enum.ScaleType.Fit;
+                    Size = UDim2.fromScale(1, 1);
+                    ZIndex = 2;
+                    Parent = Flake;
+                });
                 PumpkinVisuals[Flake] = {
-                    Stroke = PumpkinStroke;
-                    BodyStroke = BodyStroke;
-                    Glow = Glow;
+                    Image = PumpkinImage;
+                    GlowStroke = GlowStroke;
                     Sparks = CollisionSparks;
                 };
             else
@@ -4612,14 +4482,8 @@ function Library:CreateWindow(...)
                                 * (1 + math.sin(Now * 2.2 + State.PulsePhase) * 0.035 + State.Impact * 0.12);
                             local Visual = PumpkinVisuals[Pumpkin];
                             if Visual then
-                                if Visual.Stroke then
-                                    Visual.Stroke.Transparency = 0.06 + (1 - State.Impact) * 0.68;
-                                end;
-                                if Visual.BodyStroke then
-                                    Visual.BodyStroke.Transparency = 0.08 + (1 - State.Impact) * 0.48;
-                                end;
-                                if Visual.Glow then
-                                    Visual.Glow.BackgroundTransparency = 0.74 + (1 - State.Impact) * 0.2;
+                                if Visual.GlowStroke then
+                                    Visual.GlowStroke.Transparency = 0.96 - State.Impact * 0.58;
                                 end;
                                 if Visual.Sparks then
                                     for SparkIndex, Spark in ipairs(Visual.Sparks) do
