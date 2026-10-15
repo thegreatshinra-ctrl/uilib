@@ -18,7 +18,9 @@ local ThemeManager = {} do
 
 		local scheme = data[2]
 		for idx, col in next, customThemeData or scheme do
-			local color = Color3.fromHex(col)
+			local color = self.Library.IsOctober and idx == 'AccentColor'
+				and self.Library.OctoberAccentColor
+				or Color3.fromHex(col)
 			self.Library[idx] = color
 			
 			if Options[idx] then
@@ -33,9 +35,13 @@ local ThemeManager = {} do
 		-- This allows us to force apply themes without loading the themes tab :)
 		local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
 		for i, field in next, options do
-			if Options and Options[field] then
+			if Options and Options[field] and not (self.Library.IsOctober and field == "AccentColor") then
 				self.Library[field] = Options[field].Value
 			end
+		end
+
+		if self.Library.IsOctober then
+			self.Library.AccentColor = self.Library.OctoberAccentColor
 		end
 
 		self.Library.AccentColorDark = self.Library:GetDarkerColor(self.Library.AccentColor);
@@ -127,9 +133,19 @@ local ThemeManager = {} do
 			self:ThemeUpdate()
 		end
 
+		local CorrectingOctoberAccent = false
 		Options.BackgroundColor:OnChanged(UpdateTheme)
 		Options.MainColor:OnChanged(UpdateTheme)
-		Options.AccentColor:OnChanged(UpdateTheme)
+		Options.AccentColor:OnChanged(function()
+			if self.Library.IsOctober
+				and not CorrectingOctoberAccent
+				and Options.AccentColor.Value ~= self.Library.OctoberAccentColor then
+				CorrectingOctoberAccent = true
+				Options.AccentColor:SetValueRGB(self.Library.OctoberAccentColor)
+				CorrectingOctoberAccent = false
+			end
+			UpdateTheme()
+		end)
 		Options.OutlineColor:OnChanged(UpdateTheme)
 		Options.FontColor:OnChanged(UpdateTheme)
 	end
