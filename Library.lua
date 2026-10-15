@@ -16,8 +16,6 @@ local function GetMousePosition()
 end;
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
-local IsOctober = os.date('*t').month == 10;
-local OctoberAccentColor = Color3.fromRGB(255, 126, 24);
 
 local ScreenGuiName = 'LinoriaLibraryScreenGui';
 local PreviousLibrary = getgenv().Library;
@@ -74,9 +72,7 @@ local Library = {
     FontColor = Color3.fromRGB(174, 176, 181);
     MainColor = Color3.fromRGB(12, 13, 15);
     BackgroundColor = Color3.fromRGB(7, 8, 10);
-    AccentColor = IsOctober and OctoberAccentColor or Color3.fromRGB(255, 255, 255);
-    OctoberAccentColor = OctoberAccentColor;
-    IsOctober = IsOctober;
+    AccentColor = Color3.fromRGB(255, 255, 255);
     OutlineColor = Color3.fromRGB(20, 21, 24);
     RiskColor = Color3.fromRGB(255, 50, 50),
 
@@ -3416,9 +3412,6 @@ function Library:CreateWindow(...)
     local SnowfallTweens = {};
     local SnowfallTwinkleTweens = {};
     local SnowfallGeneration = 0;
-    local PumpkinPhysics = {};
-    local PumpkinVisuals = {};
-    local PumpkinPhysicsConnection;
     local SnowRandomizer = Random.new();
     if Config.Snowfall then
         SnowfallLayer = Library:Create('Frame', {
@@ -3429,8 +3422,8 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, IsOctober and 56 or 42 do
-            local Size = SnowRandomizer:NextInteger(IsOctober and 18 or 10, IsOctober and 28 or 22);
+        for _ = 1, 42 do
+            local Size = SnowRandomizer:NextInteger(10, 22);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3446,69 +3439,33 @@ function Library:CreateWindow(...)
             SnowflakeScales[Flake] = FlakeScale;
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
 
-            if IsOctober then
-                local CollisionSparks = {};
-                local PumpkinGlow = Library:Create('Frame', {
+            local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
+            for RayIndex = 0, 5 do
+                local Rotation = RayIndex * 60;
+                Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = OctoberAccentColor;
-                    BackgroundTransparency = 0.94;
+                    BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                    BackgroundTransparency = RayTransparency;
                     BorderSizePixel = 0;
                     Position = UDim2.fromScale(0.5, 0.5);
-                    Size = UDim2.fromScale(1.2, 1.2);
+                    Rotation = Rotation;
+                    Size = UDim2.new(0, 1, 0.88, 0);
                     ZIndex = 1;
                     Parent = Flake;
                 });
-                Library:AddCorner(PumpkinGlow, 100);
-                local GlowStroke = Instance.new('UIStroke');
-                GlowStroke.Color = OctoberAccentColor;
-                GlowStroke.Thickness = 1.4;
-                GlowStroke.Transparency = 1;
-                GlowStroke.Parent = PumpkinGlow;
-                local PumpkinImage = Library:Create('ImageLabel', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundTransparency = 1;
-                    Image = 'rbxassetid://94923281869963';
-                    ImageColor3 = OctoberAccentColor;
-                    Position = UDim2.fromScale(0.5, 0.5);
-                    ScaleType = Enum.ScaleType.Fit;
-                    Size = UDim2.fromScale(1, 1);
-                    ZIndex = 2;
-                    Parent = Flake;
-                });
-                PumpkinVisuals[Flake] = {
-                    Image = PumpkinImage;
-                    GlowStroke = GlowStroke;
-                    Sparks = CollisionSparks;
-                };
-            else
-                local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
-                for RayIndex = 0, 5 do
-                    local Rotation = RayIndex * 60;
+
+                for _, Branch in next, { -35, 35 } do
                     Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 0.5);
+                        AnchorPoint = Vector2.new(0.5, 1);
                         BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                        BackgroundTransparency = RayTransparency;
+                        BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
                         BorderSizePixel = 0;
-                        Position = UDim2.fromScale(0.5, 0.5);
-                        Rotation = Rotation;
-                        Size = UDim2.new(0, 1, 0.88, 0);
+                        Position = UDim2.new(0.5, 0, 0.32, 0);
+                        Rotation = Rotation + Branch;
+                        Size = UDim2.new(0, 1, 0.28, 0);
                         ZIndex = 1;
                         Parent = Flake;
                     });
-
-                    for _, Branch in next, { -35, 35 } do
-                        Library:Create('Frame', {
-                            AnchorPoint = Vector2.new(0.5, 1);
-                            BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                            BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
-                            BorderSizePixel = 0;
-                            Position = UDim2.new(0.5, 0, 0.32, 0);
-                            Rotation = Rotation + Branch;
-                            Size = UDim2.new(0, 1, 0.28, 0);
-                            ZIndex = 1;
-                            Parent = Flake;
-                        });
-                    end;
                 end;
             end;
 
@@ -3517,10 +3474,6 @@ function Library:CreateWindow(...)
 
         Library.SnowfallCleanup = function()
             SnowfallGeneration = SnowfallGeneration + 1;
-            if PumpkinPhysicsConnection then
-                PumpkinPhysicsConnection:Disconnect();
-                PumpkinPhysicsConnection = nil;
-            end;
             for Flake, FallTween in next, SnowfallTweens do
                 FallTween:Cancel();
                 SnowfallTweens[Flake] = nil;
@@ -4362,197 +4315,51 @@ function Library:CreateWindow(...)
             SnowfallLayer.Visible = Toggled;
 
             if Toggled then
-                if IsOctober then
-                    local LayerSize = SnowfallLayer.AbsoluteSize;
-                    if LayerSize.X <= 0 or LayerSize.Y <= 0 then
-                        local Camera = workspace.CurrentCamera;
-                        LayerSize = Camera and Camera.ViewportSize or Vector2.new(1280, 720);
-                    end;
-
-                    local PumpkinStates = {};
-                    for _, Pumpkin in next, Snowflakes do
-                        Pumpkin.Visible = true;
-                        local Radius = Pumpkin.AbsoluteSize.X * 0.42;
-                        if Radius <= 0 then
-                            Radius = Pumpkin.Size.X.Offset * 0.42;
-                        end;
-                        local State = {
-                            Position = Vector2.new(
-                                SnowRandomizer:NextNumber(Radius, math.max(Radius, LayerSize.X - Radius)),
-                                SnowRandomizer:NextNumber(-Radius, LayerSize.Y + Radius)
+                for _, Flake in next, Snowflakes do
+                    Flake.Visible = true;
+                    local FlakeScale = SnowflakeScales[Flake];
+                    local BaseScale = SnowflakeBaseScales[Flake];
+                    FlakeScale.Scale = BaseScale;
+                    local TwinkleTween = TweenService:Create(
+                        FlakeScale,
+                        TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
+                    );
+                    SnowfallTwinkleTweens[Flake] = TwinkleTween;
+                    TwinkleTween:Play();
+                    task.spawn(function()
+                        local FirstFall = true;
+                        while Generation == SnowfallGeneration and Toggled do
+                            local StartX = SnowRandomizer:NextNumber(0, 1);
+                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
+                            local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
+                            Flake.Position = UDim2.fromScale(StartX, StartY);
+                            Flake.Rotation = 0;
+                            local FallTween = TweenService:Create(
+                                Flake,
+                                TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
+                                {
+                                    Position = UDim2.fromScale(EndX, 1.08);
+                                    Rotation = SnowRandomizer:NextNumber(-180, 180);
+                                }
                             );
-                            Velocity = Vector2.new(
-                                SnowRandomizer:NextNumber(-22, 22),
-                                SnowRandomizer:NextNumber(10, 32)
-                            );
-                            Radius = Radius;
-                            Rotation = SnowRandomizer:NextNumber(0, math.pi * 2);
-                            AngularVelocity = SnowRandomizer:NextNumber(-1.8, 1.8);
-                            PulsePhase = SnowRandomizer:NextNumber(0, math.pi * 2);
-                            Impact = 0;
-                            BaseScale = SnowflakeBaseScales[Pumpkin];
-                        };
-                        PumpkinPhysics[Pumpkin] = State;
-                        table.insert(PumpkinStates, { Frame = Pumpkin, State = State });
-                    end;
-
-                    PumpkinPhysicsConnection = RenderStepped:Connect(function(DeltaTime)
-                        if Generation ~= SnowfallGeneration or not Toggled then
-                            return;
-                        end;
-
-                        local ScreenSize = SnowfallLayer.AbsoluteSize;
-                        if ScreenSize.X <= 0 or ScreenSize.Y <= 0 then
-                            return;
-                        end;
-                        local Dt = math.min(DeltaTime, 0.05);
-                        local Now = os.clock();
-
-                        for _, Entry in ipairs(PumpkinStates) do
-                            local State = Entry.State;
-                            State.Velocity += Vector2.new(math.sin(Now * 0.55 + State.PulsePhase) * 5, 18) * Dt;
-                            State.Velocity *= math.max(0, 1 - Dt * 0.025);
-                            State.Position += State.Velocity * Dt;
-                            State.Rotation += State.AngularVelocity * Dt;
-                            State.AngularVelocity *= math.max(0, 1 - Dt * 0.12);
-                            State.Impact = math.max(0, State.Impact - Dt * 2.4);
-
-                            if State.Position.X < State.Radius then
-                                State.Position = Vector2.new(State.Radius, State.Position.Y);
-                                State.Velocity = Vector2.new(math.abs(State.Velocity.X) * 0.82, State.Velocity.Y);
-                                State.AngularVelocity += State.Velocity.Y * 0.002;
-                                State.Impact = 1;
-                            elseif State.Position.X > ScreenSize.X - State.Radius then
-                                State.Position = Vector2.new(ScreenSize.X - State.Radius, State.Position.Y);
-                                State.Velocity = Vector2.new(-math.abs(State.Velocity.X) * 0.82, State.Velocity.Y);
-                                State.AngularVelocity -= State.Velocity.Y * 0.002;
-                                State.Impact = 1;
+                            SnowfallTweens[Flake] = FallTween;
+                            FallTween:Play();
+                            FallTween.Completed:Wait();
+                            if SnowfallTweens[Flake] == FallTween then
+                                SnowfallTweens[Flake] = nil;
                             end;
-
-                            if State.Position.Y > ScreenSize.Y + State.Radius then
-                                State.Position = Vector2.new(
-                                    SnowRandomizer:NextNumber(State.Radius, math.max(State.Radius, ScreenSize.X - State.Radius)),
-                                    -State.Radius
-                                );
-                                State.Velocity = Vector2.new(
-                                    SnowRandomizer:NextNumber(-22, 22),
-                                    SnowRandomizer:NextNumber(10, 32)
-                                );
+                            if Generation ~= SnowfallGeneration or not Toggled then
+                                break;
                             end;
+                            FirstFall = false;
                         end;
-
-                        for FirstIndex = 1, #PumpkinStates - 1 do
-                            local First = PumpkinStates[FirstIndex].State;
-                            for SecondIndex = FirstIndex + 1, #PumpkinStates do
-                                local Second = PumpkinStates[SecondIndex].State;
-                                local Separation = Second.Position - First.Position;
-                                local Distance = Separation.Magnitude;
-                                local MinimumDistance = First.Radius + Second.Radius;
-                                if Distance < MinimumDistance then
-                                    local Normal = Distance > 0.001
-                                        and Separation / Distance
-                                        or Vector2.new(1, 0);
-                                    local Overlap = MinimumDistance - Distance;
-                                    First.Position -= Normal * (Overlap * 0.5);
-                                    Second.Position += Normal * (Overlap * 0.5);
-
-                                    local RelativeVelocity = Second.Velocity - First.Velocity;
-                                    local NormalSpeed = RelativeVelocity:Dot(Normal);
-                                    if NormalSpeed < 0 then
-                                        local Impulse = -(1 + 0.78) * NormalSpeed * 0.5;
-                                        First.Velocity -= Normal * Impulse;
-                                        Second.Velocity += Normal * Impulse;
-                                        First.AngularVelocity -= Normal.Y * Impulse * 0.08;
-                                        Second.AngularVelocity += Normal.Y * Impulse * 0.08;
-                                        First.Velocity += Vector2.new(-Normal.Y, Normal.X) * Impulse * 0.16;
-                                        Second.Velocity -= Vector2.new(-Normal.Y, Normal.X) * Impulse * 0.16;
-                                        First.Impact = 1;
-                                        Second.Impact = 1;
-                                    end;
-                                end;
-                            end;
-                        end;
-
-                        for _, Entry in ipairs(PumpkinStates) do
-                            local Pumpkin = Entry.Frame;
-                            local State = Entry.State;
-                            Pumpkin.Position = UDim2.fromOffset(State.Position.X, State.Position.Y);
-                            Pumpkin.Rotation = math.deg(State.Rotation);
-                            SnowflakeScales[Pumpkin].Scale = State.BaseScale
-                                * (1 + math.sin(Now * 2.2 + State.PulsePhase) * 0.035 + State.Impact * 0.12);
-                            local Visual = PumpkinVisuals[Pumpkin];
-                            if Visual then
-                                if Visual.GlowStroke then
-                                    Visual.GlowStroke.Transparency = 0.96 - State.Impact * 0.58;
-                                end;
-                                if Visual.Sparks then
-                                    for SparkIndex, Spark in ipairs(Visual.Sparks) do
-                                        local SparkAngle = (SparkIndex / #Visual.Sparks) * math.pi * 2
-                                            + State.Rotation * 0.2;
-                                        local SparkDistance = 0.34 + (1 - State.Impact) * 0.28;
-                                        Spark.Position = UDim2.fromScale(
-                                            0.5 + math.cos(SparkAngle) * SparkDistance,
-                                            0.6 + math.sin(SparkAngle) * SparkDistance
-                                        );
-                                        Spark.Rotation = math.deg(SparkAngle) + 45;
-                                        Spark.BackgroundTransparency = 1 - State.Impact * 0.9;
-                                        Spark.Visible = State.Impact > 0.04;
-                                    end;
-                                end;
-                            end;
+                        if Generation == SnowfallGeneration then
+                            Flake.Visible = false;
                         end;
                     end);
-                else
-                    for _, Flake in next, Snowflakes do
-                        Flake.Visible = true;
-                        local FlakeScale = SnowflakeScales[Flake];
-                        local BaseScale = SnowflakeBaseScales[Flake];
-                        FlakeScale.Scale = BaseScale;
-                        local TwinkleTween = TweenService:Create(
-                            FlakeScale,
-                            TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                            { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
-                        );
-                        SnowfallTwinkleTweens[Flake] = TwinkleTween;
-                        TwinkleTween:Play();
-                        task.spawn(function()
-                            local FirstFall = true;
-                            while Generation == SnowfallGeneration and Toggled do
-                                local StartX = SnowRandomizer:NextNumber(0, 1);
-                                local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
-                                local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
-                                Flake.Position = UDim2.fromScale(StartX, StartY);
-                                Flake.Rotation = 0;
-                                local FallTween = TweenService:Create(
-                                    Flake,
-                                    TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
-                                    {
-                                        Position = UDim2.fromScale(EndX, 1.08);
-                                        Rotation = SnowRandomizer:NextNumber(-180, 180);
-                                    }
-                                );
-                                SnowfallTweens[Flake] = FallTween;
-                                FallTween:Play();
-                                FallTween.Completed:Wait();
-                                if SnowfallTweens[Flake] == FallTween then
-                                    SnowfallTweens[Flake] = nil;
-                                end;
-                                if Generation ~= SnowfallGeneration or not Toggled then
-                                    break;
-                                end;
-                                FirstFall = false;
-                            end;
-                            if Generation == SnowfallGeneration then
-                                Flake.Visible = false;
-                            end;
-                        end);
-                    end;
                 end;
             else
-                if PumpkinPhysicsConnection then
-                    PumpkinPhysicsConnection:Disconnect();
-                    PumpkinPhysicsConnection = nil;
-                end;
                 for Flake, FallTween in next, SnowfallTweens do
                     FallTween:Cancel();
                     SnowfallTweens[Flake] = nil;
@@ -4565,7 +4372,6 @@ function Library:CreateWindow(...)
                 for _, Flake in next, Snowflakes do
                     Flake.Visible = false;
                 end;
-                table.clear(PumpkinPhysics);
             end;
         end;
 
