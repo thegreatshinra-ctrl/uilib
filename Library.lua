@@ -72,9 +72,10 @@ local Library = {
     FontColor = Color3.fromRGB(174, 176, 181);
     MainColor = Color3.fromRGB(12, 13, 15);
     BackgroundColor = Color3.fromRGB(7, 8, 10);
-    AccentColor = Color3.fromRGB(255, 255, 255);
+    AccentColor = Color3.fromRGB(144, 195, 255);
     OutlineColor = Color3.fromRGB(20, 21, 24);
     RiskColor = Color3.fromRGB(255, 50, 50),
+    DimmedColor = Color3.fromRGB(100, 100, 100);
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Code,
@@ -1383,9 +1384,13 @@ do
             ContainerLabel.Text = string.format('[%s] %s', KeyPicker.Value, Info.Text);
 
             ContainerLabel.Visible = true;
-            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
-
-            ContainerLabelRegistry.Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+            if KeyPicker.Value == 'None' then
+                ContainerLabel.TextColor3 = Library.DimmedColor;
+                ContainerLabelRegistry.Properties.TextColor3 = 'DimmedColor';
+            else
+                ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
+                ContainerLabelRegistry.Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+            end;
 
             local YSize = 0
             local XSize = 0
@@ -1595,9 +1600,11 @@ do
 
     function Funcs:AddLabel(Text, DoesWrap)
         local Label = {};
+        Label.Name = Text;
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        table.insert(Groupbox.Elements, Label);
         local TextLabel = Library:CreateLabel({
             Size = UDim2.new(1, -4, 0, 15);
             TextSize = 14;
@@ -1708,11 +1715,20 @@ do
                 local PositionScale = (Index - 1) / ColumnCount;
                 local IsFirst = Index == 1;
                 local IsLast = Index == ColumnCount;
+                
+                local CellValue = Value;
+                local CellColor = Library.FontColor;
+                
+                if type(Value) == 'table' and Value.Text then
+                    CellValue = Value.Text;
+                    CellColor = Value.Color or Library.FontColor;
+                end;
+                
                 local Cell = Library:CreateLabel({
                     BackgroundTransparency = 1;
                     Position = UDim2.new(PositionScale, IsFirst and 6 or 0, 0, 0);
                     Size = UDim2.new(1 / ColumnCount, IsLast and -6 or -4, 1, 0);
-                    Text = Value == nil and '' or tostring(Value);
+                    Text = CellValue == nil and '' or tostring(CellValue);
                     TextSize = 13;
                     TextXAlignment = IsFirst and Enum.TextXAlignment.Left or (IsLast and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center);
                     TextTruncate = Enum.TextTruncate.AtEnd;
@@ -1724,6 +1740,9 @@ do
                     Cell.TextColor3 = Library.AccentColor;
                     Library:RemoveFromRegistry(Cell);
                     Library:AddToRegistry(Cell, { TextColor3 = 'AccentColor' });
+                elseif type(Value) == 'table' and Value.Color then
+                    Cell.TextColor3 = CellColor;
+                    Library:RemoveFromRegistry(Cell);
                 end;
 
                 table.insert(Cells, Cell);
@@ -1814,6 +1833,8 @@ do
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        Button.Name = Button.Text;
+        table.insert(Groupbox.Elements, Button);
 
         local function CreateBaseButton(Button)
             local Outer = Library:Create('Frame', {
@@ -2012,11 +2033,13 @@ do
             Numeric = Info.Numeric or false;
             Finished = Info.Finished or false;
             Type = 'Input';
+            Name = Info.Text;
             Callback = Info.Callback or function(Value) end;
         };
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        table.insert(Groupbox.Elements, Textbox);
 
         local InputLabel = Library:CreateLabel({
             Size = UDim2.new(1, 0, 0, 15);
@@ -2197,6 +2220,7 @@ do
         local Toggle = {
             Value = Info.Default or false;
             Type = 'Toggle';
+            Name = Info.Text;
 
             Callback = Info.Callback or function(Value) end;
             Addons = {},
@@ -2205,6 +2229,7 @@ do
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        table.insert(Groupbox.Elements, Toggle);
 
         local ToggleOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.fromRGB(48, 49, 53);
@@ -2355,11 +2380,13 @@ do
             Rounding = Info.Rounding;
             MaxSize = 232;
             Type = 'Slider';
+            Name = Info.Text;
             Callback = Info.Callback or function(Value) end;
         };
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        table.insert(Groupbox.Elements, Slider);
 
         if not Info.Compact then
             Library:CreateLabel({
@@ -2562,12 +2589,14 @@ do
             Value = Info.Multi and {};
             Multi = Info.Multi;
             Type = 'Dropdown';
-            SpecialType = Info.SpecialType; -- can be either 'Player' or 'Team'
+            Name = Info.Text;
+            SpecialType = Info.SpecialType;
             Callback = Info.Callback or function(Value) end;
         };
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+        table.insert(Groupbox.Elements, Dropdown);
 
         local RelativeOffset = 0;
 
@@ -3409,6 +3438,8 @@ function Library:CreateWindow(...)
     local Snowflakes = {};
     local SnowflakeScales = {};
     local SnowflakeBaseScales = {};
+    local SnowflakeVelocities = {};
+    local SnowflakeRotations = {};
     local SnowfallTweens = {};
     local SnowfallTwinkleTweens = {};
     local SnowfallGeneration = 0;
@@ -3422,8 +3453,8 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, 42 do
-            local Size = SnowRandomizer:NextInteger(10, 22);
+        for _ = 1, 120 do
+            local Size = SnowRandomizer:NextInteger(8, 28);
             local Flake = Library:Create('Frame', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3434,22 +3465,29 @@ function Library:CreateWindow(...)
                 Parent = SnowfallLayer;
             });
             local FlakeScale = Instance.new('UIScale');
-            FlakeScale.Scale = SnowRandomizer:NextNumber(0.8, 1.15);
+            FlakeScale.Scale = SnowRandomizer:NextNumber(0.6, 1.3);
             FlakeScale.Parent = Flake;
             SnowflakeScales[Flake] = FlakeScale;
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
+            SnowflakeVelocities[Flake] = {
+                X = SnowRandomizer:NextNumber(-0.15, 0.15),
+                Y = SnowRandomizer:NextNumber(0.8, 1.4),
+                Drift = SnowRandomizer:NextNumber(-0.25, 0.25)
+            };
+            SnowflakeRotations[Flake] = SnowRandomizer:NextNumber(-45, 45);
 
-            local RayTransparency = SnowRandomizer:NextNumber(0.25, 0.55);
+            local IcyBlueWhite = Color3.fromRGB(215, 232, 255);
+            local RayTransparency = SnowRandomizer:NextNumber(0.15, 0.45);
             for RayIndex = 0, 5 do
                 local Rotation = RayIndex * 60;
                 Library:Create('Frame', {
                     AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = Color3.fromRGB(230, 240, 255);
+                    BackgroundColor3 = IcyBlueWhite;
                     BackgroundTransparency = RayTransparency;
                     BorderSizePixel = 0;
                     Position = UDim2.fromScale(0.5, 0.5);
                     Rotation = Rotation;
-                    Size = UDim2.new(0, 1, 0.88, 0);
+                    Size = UDim2.new(0, 1, 0.92, 0);
                     ZIndex = 1;
                     Parent = Flake;
                 });
@@ -3457,12 +3495,12 @@ function Library:CreateWindow(...)
                 for _, Branch in next, { -35, 35 } do
                     Library:Create('Frame', {
                         AnchorPoint = Vector2.new(0.5, 1);
-                        BackgroundColor3 = Color3.fromRGB(230, 240, 255);
-                        BackgroundTransparency = math.min(RayTransparency + 0.12, 0.75);
+                        BackgroundColor3 = IcyBlueWhite;
+                        BackgroundTransparency = math.min(RayTransparency + 0.1, 0.7);
                         BorderSizePixel = 0;
-                        Position = UDim2.new(0.5, 0, 0.32, 0);
+                        Position = UDim2.new(0.5, 0, 0.35, 0);
                         Rotation = Rotation + Branch;
-                        Size = UDim2.new(0, 1, 0.28, 0);
+                        Size = UDim2.new(0, 1, 0.32, 0);
                         ZIndex = 1;
                         Parent = Flake;
                     });
@@ -3691,6 +3729,69 @@ function Library:CreateWindow(...)
         Parent = TabArea;
     });
 
+    local SearchBarContainer = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(1, -208, 0, 0);
+        Size = UDim2.new(0, 200, 0, 21);
+        ZIndex = 1;
+        Parent = TabArea;
+    });
+    Library:AddCorner(SearchBarContainer, 5);
+    Library:AddToRegistry(SearchBarContainer, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    local SearchBarInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
+        ZIndex = 2;
+        Parent = SearchBarContainer;
+    });
+    Library:AddCorner(SearchBarInner, 4);
+    Library:AddToRegistry(SearchBarInner, {
+        BackgroundColor3 = 'BackgroundColor';
+    });
+
+    local SearchIconImage, SearchIconRectSize, SearchIconRectOffset = Library:GetIconAsset('search');
+    local SearchIcon = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = SearchIconImage;
+        ImageRectSize = SearchIconRectSize;
+        ImageRectOffset = SearchIconRectOffset;
+        ImageColor3 = Library.FontColor;
+        Position = UDim2.new(0, 6, 0.5, -6);
+        Size = UDim2.fromOffset(12, 12);
+        ScaleType = Enum.ScaleType.Fit;
+        ZIndex = 3;
+        Parent = SearchBarInner;
+    });
+    Library:AddToRegistry(SearchIcon, {
+        ImageColor3 = 'FontColor';
+    });
+
+    local SearchBox = Library:Create('TextBox', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 24, 0, 0);
+        Size = UDim2.new(1, -28, 1, 0);
+        ClearTextOnFocus = false;
+        Font = Library.Font;
+        PlaceholderText = 'Search...';
+        PlaceholderColor3 = Color3.fromRGB(100, 100, 100);
+        Text = '';
+        TextColor3 = Library.FontColor;
+        TextSize = 13;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 3;
+        Parent = SearchBarInner;
+    });
+    Library:AddToRegistry(SearchBox, {
+        TextColor3 = 'FontColor';
+    });
+
     local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
@@ -3777,6 +3878,35 @@ function Library:CreateWindow(...)
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
+        });
+
+        local TabUnderline = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 4, 1, -2);
+            Size = UDim2.new(1, -8, 0, 2);
+            Visible = false;
+            ZIndex = 2;
+            Parent = TabButton;
+        });
+        Library:AddCorner(TabUnderline, 1);
+        Library:AddToRegistry(TabUnderline, {
+            BackgroundColor3 = 'AccentColor';
+        });
+
+        local TabUnderlineGlow = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BackgroundTransparency = 0.5;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 2, 1, -4);
+            Size = UDim2.new(1, -4, 0, 4);
+            Visible = false;
+            ZIndex = 1;
+            Parent = TabButton;
+        });
+        Library:AddCorner(TabUnderlineGlow, 2);
+        Library:AddToRegistry(TabUnderlineGlow, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
@@ -3873,12 +4003,16 @@ function Library:CreateWindow(...)
 
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            TabUnderline.Visible = true;
+            TabUnderlineGlow.Visible = true;
             TabFrame.Visible = true;
         end;
 
         function Tab:HideTab()
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
+            TabUnderline.Visible = false;
+            TabUnderlineGlow.Visible = false;
             TabFrame.Visible = false;
         end;
 
@@ -3887,8 +4021,55 @@ function Library:CreateWindow(...)
             TabListLayout:ApplyLayout();
         end;
 
+        function Tab:FilterGroupboxes(SearchText)
+            SearchText = SearchText:lower();
+            local HasVisibleBox = false;
+
+            for _, Groupbox in pairs(Tab.Groupboxes) do
+                if SearchText == '' then
+                    Groupbox.BoxOuter.Visible = true;
+                    HasVisibleBox = true;
+                else
+                    local GroupboxName = Groupbox.Name:lower();
+                    local HasMatchingElement = false;
+
+                    if GroupboxName:find(SearchText, 1, true) then
+                        Groupbox.BoxOuter.Visible = true;
+                        HasVisibleBox = true;
+                    else
+                        for _, Element in pairs(Groupbox.Elements or {}) do
+                            if Element.Name then
+                                local ElementName = tostring(Element.Name):lower();
+                                if ElementName:find(SearchText, 1, true) then
+                                    HasMatchingElement = true;
+                                    break;
+                                end;
+                            end;
+                        end;
+
+                        Groupbox.BoxOuter.Visible = HasMatchingElement;
+                        if HasMatchingElement then
+                            HasVisibleBox = true;
+                        end;
+                    end;
+                end;
+            end;
+
+            for _, Tabbox in pairs(Tab.Tabboxes) do
+                if SearchText == '' then
+                    Tabbox.BoxOuter.Visible = true;
+                else
+                    Tabbox.BoxOuter.Visible = false;
+                end;
+            end;
+
+            return HasVisibleBox;
+        end;
+
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
+            Groupbox.Name = Info.Name;
+            Groupbox.Elements = {};
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.MainColor;
@@ -3993,6 +4174,7 @@ function Library:CreateWindow(...)
             Groupbox:AddBlank(3);
             Groupbox:Resize();
 
+            Groupbox.BoxOuter = BoxOuter;
             Tab.Groupboxes[Info.Name] = Groupbox;
 
             return Groupbox;
@@ -4183,6 +4365,7 @@ function Library:CreateWindow(...)
             end;
 
             Tab.Tabboxes[Info.Name or ''] = Tabbox;
+            Tabbox.BoxOuter = BoxOuter;
 
             return Tabbox;
         end;
@@ -4319,11 +4502,13 @@ function Library:CreateWindow(...)
                     Flake.Visible = true;
                     local FlakeScale = SnowflakeScales[Flake];
                     local BaseScale = SnowflakeBaseScales[Flake];
+                    local Velocity = SnowflakeVelocities[Flake];
+                    local RotationSpeed = SnowflakeRotations[Flake];
                     FlakeScale.Scale = BaseScale;
                     local TwinkleTween = TweenService:Create(
                         FlakeScale,
-                        TweenInfo.new(SnowRandomizer:NextNumber(0.8, 1.6), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.12, 1.28) }
+                        TweenInfo.new(SnowRandomizer:NextNumber(0.6, 1.3), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.15, 1.35) }
                     );
                     SnowfallTwinkleTweens[Flake] = TwinkleTween;
                     TwinkleTween:Play();
@@ -4331,16 +4516,21 @@ function Library:CreateWindow(...)
                         local FirstFall = true;
                         while Generation == SnowfallGeneration and Toggled do
                             local StartX = SnowRandomizer:NextNumber(0, 1);
-                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.18, 0.18), 0, 1);
-                            local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.16, -0.03);
+                            local DriftOffset = Velocity.Drift * SnowRandomizer:NextNumber(0.7, 1.3);
+                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.25, 0.25) + DriftOffset, 0, 1);
+                            local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.2, -0.05);
                             Flake.Position = UDim2.fromScale(StartX, StartY);
-                            Flake.Rotation = 0;
+                            Flake.Rotation = SnowRandomizer:NextNumber(-30, 30);
+                            
+                            local FallDuration = SnowRandomizer:NextNumber(5, 14) / Velocity.Y;
+                            local RotationAmount = RotationSpeed * SnowRandomizer:NextNumber(1.5, 3.5);
+                            
                             local FallTween = TweenService:Create(
                                 Flake,
-                                TweenInfo.new(SnowRandomizer:NextNumber(8, 16), Enum.EasingStyle.Linear),
+                                TweenInfo.new(FallDuration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
                                 {
-                                    Position = UDim2.fromScale(EndX, 1.08);
-                                    Rotation = SnowRandomizer:NextNumber(-180, 180);
+                                    Position = UDim2.fromScale(EndX, 1.12);
+                                    Rotation = Flake.Rotation + RotationAmount;
                                 }
                             );
                             SnowfallTweens[Flake] = FallTween;
@@ -4446,6 +4636,13 @@ function Library:CreateWindow(...)
     end))
 
     if Config.AutoShow then task.spawn(Library.Toggle) end
+
+    SearchBox:GetPropertyChangedSignal('Text'):Connect(function()
+        local SearchText = SearchBox.Text;
+        for _, Tab in pairs(Window.Tabs) do
+            Tab:FilterGroupboxes(SearchText);
+        end;
+    end);
 
     Window.Holder = Outer;
 
