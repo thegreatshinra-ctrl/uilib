@@ -72,7 +72,7 @@ local Library = {
     FontColor = Color3.fromRGB(174, 176, 181);
     MainColor = Color3.fromRGB(12, 13, 15);
     BackgroundColor = Color3.fromRGB(7, 8, 10);
-    AccentColor = Color3.fromRGB(144, 195, 255);
+    AccentColor = Color3.fromRGB(215, 232, 255);
     OutlineColor = Color3.fromRGB(20, 21, 24);
     RiskColor = Color3.fromRGB(255, 50, 50),
     DimmedColor = Color3.fromRGB(100, 100, 100);
@@ -3193,7 +3193,7 @@ do
         Parent = InnerFrame;
     });
 
-    local WatermarkIconImage, WatermarkIconRectSize, WatermarkIconRectOffset = Library:GetIconAsset('snowflake');
+    local WatermarkIconImage, WatermarkIconRectSize, WatermarkIconRectOffset = Library:GetIconAsset('plus');
     local WatermarkIcon = Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = WatermarkIconImage;
@@ -3589,17 +3589,25 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(HeaderFill, { BackgroundColor3 = 'BackgroundColor' });
     Library:AddToRegistry(HeaderDivider, { BackgroundColor3 = 'OutlineColor' });
 
-    local HeaderLeftPadding = 47;
+    local HeaderLeftPadding = 45;
     local TitleIconBadge = Library:Create('Frame', {
         BackgroundColor3 = Library.AccentColor;
-        BackgroundTransparency = 0.86;
+        BackgroundTransparency = 0.88;
         BorderSizePixel = 0;
-        Position = UDim2.fromOffset(11, 4);
-        Size = UDim2.fromOffset(26, 24);
+        Position = UDim2.fromOffset(10, 3);
+        Size = UDim2.fromOffset(26, 26);
         ZIndex = 3;
         Parent = Header;
     });
     Library:AddCorner(TitleIconBadge, 8);
+    local TitleIconStroke = Instance.new('UIStroke');
+    TitleIconStroke.Color = Library.AccentColor;
+    TitleIconStroke.Thickness = 1;
+    TitleIconStroke.Transparency = 0.78;
+    TitleIconStroke.Parent = TitleIconBadge;
+    Library:AddToRegistry(TitleIconStroke, {
+        Color = 'AccentColor';
+    });
     Library:AddToRegistry(TitleIconBadge, {
         BackgroundColor3 = 'AccentColor';
     });
@@ -3607,8 +3615,8 @@ function Library:CreateWindow(...)
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.fromOffset(3, 2);
-        Size = UDim2.fromOffset(20, 20);
+        Position = UDim2.fromOffset(4, 4);
+        Size = UDim2.fromOffset(18, 18);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = TitleIconBadge;
@@ -3646,11 +3654,11 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0.5, 0, 0.5, 0);
-        Size = UDim2.new(0, 180, 0, 20);
+        Size = UDim2.new(0, 170, 0, 22);
         ZIndex = 3;
         Parent = Header;
     });
-    Library:AddCorner(SearchBarContainer, 5);
+    Library:AddCorner(SearchBarContainer, 7);
     Library:AddToRegistry(SearchBarContainer, {
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
@@ -3664,7 +3672,7 @@ function Library:CreateWindow(...)
         ZIndex = 4;
         Parent = SearchBarContainer;
     });
-    Library:AddCorner(SearchBarInner, 4);
+    Library:AddCorner(SearchBarInner, 6);
     Library:AddToRegistry(SearchBarInner, {
         BackgroundColor3 = 'BackgroundColor';
     });
@@ -3676,8 +3684,8 @@ function Library:CreateWindow(...)
         ImageRectSize = SearchIconRectSize;
         ImageRectOffset = SearchIconRectOffset;
         ImageColor3 = Library.FontColor;
-        Position = UDim2.new(0, 5, 0.5, -5);
-        Size = UDim2.fromOffset(10, 10);
+        Position = UDim2.new(0, 6, 0.5, -6);
+        Size = UDim2.fromOffset(12, 12);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 5;
         Parent = SearchBarInner;
@@ -3688,8 +3696,8 @@ function Library:CreateWindow(...)
 
     local SearchBox = Library:Create('TextBox', {
         BackgroundTransparency = 1;
-        Position = UDim2.new(0, 20, 0, 0);
-        Size = UDim2.new(1, -24, 1, 0);
+        Position = UDim2.new(0, 23, 0, 0);
+        Size = UDim2.new(1, -27, 1, 0);
         ClearTextOnFocus = false;
         Font = Library.Font;
         PlaceholderText = 'Search...';
@@ -3884,7 +3892,7 @@ function Library:CreateWindow(...)
             BorderSizePixel = 0;
             AnchorPoint = Vector2.new(0.5, 1);
             Position = UDim2.new(0.5, 0, 1, -2);
-            Size = UDim2.fromOffset(18, 2);
+            Size = UDim2.fromOffset(22, 3);
             Visible = false;
             ZIndex = 2;
             Parent = TabButton;
@@ -3900,7 +3908,7 @@ function Library:CreateWindow(...)
             BorderSizePixel = 0;
             AnchorPoint = Vector2.new(0.5, 1);
             Position = UDim2.new(0.5, 0, 1, -1);
-            Size = UDim2.fromOffset(28, 4);
+            Size = UDim2.fromOffset(32, 5);
             Visible = false;
             ZIndex = 1;
             Parent = TabButton;
