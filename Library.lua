@@ -1223,6 +1223,8 @@ do
         local KeyPicker = {
             Value = Info.Default;
             Toggled = false;
+            TapActive = false;
+            TapGeneration = 0;
             Mode = Info.Mode or 'Toggle'; -- Always, Toggle, Hold
             Type = 'KeyPicker';
             Callback = Info.Callback or function(Value) end;
@@ -1273,11 +1275,12 @@ do
             Parent = PickInner;
         });
 
+        local Modes = Info.Modes or { 'Always', 'Toggle', 'Hold', 'Tap' };
         local ModeSelectOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.fromRGB(48, 49, 53);
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y + 1);
-            Size = UDim2.new(0, 76, 0, 68);
+            Size = UDim2.new(0, 76, 0, 8 + (#Modes * 22));
             Visible = false;
             ZIndex = 14;
             Parent = ScreenGui;
@@ -1317,7 +1320,6 @@ do
             Parent = Library.KeybindContainer;
         },  true);
 
-        local Modes = Info.Modes or { 'Always', 'Toggle', 'Hold' };
         local ModeButtons = {};
 
         for Idx, Mode in next, Modes do
@@ -1424,6 +1426,8 @@ do
         function KeyPicker:GetState()
             if KeyPicker.Mode == 'Always' then
                 return true;
+            elseif KeyPicker.Mode == 'Tap' then
+                return KeyPicker.TapActive;
             elseif KeyPicker.Mode == 'Hold' then
                 if KeyPicker.Value == 'None' then
                     return false;
@@ -1470,6 +1474,22 @@ do
 
             Library:SafeCallback(KeyPicker.Callback, KeyPicker.Toggled)
             Library:SafeCallback(KeyPicker.Clicked, KeyPicker.Toggled)
+        end
+
+        function KeyPicker:DoTap()
+            KeyPicker.TapGeneration = KeyPicker.TapGeneration + 1;
+            local Generation = KeyPicker.TapGeneration;
+            KeyPicker.TapActive = true;
+            KeyPicker:Update();
+            Library:SafeCallback(KeyPicker.Callback, true);
+            Library:SafeCallback(KeyPicker.Clicked, true);
+
+            task.delay(1, function()
+                if Generation == KeyPicker.TapGeneration then
+                    KeyPicker.TapActive = false;
+                    KeyPicker:Update();
+                end
+            end);
         end
 
         local Picking = false;
@@ -1530,19 +1550,27 @@ do
 
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
-                if KeyPicker.Mode == 'Toggle' then
+                if KeyPicker.Mode == 'Toggle' or KeyPicker.Mode == 'Tap' then
                     local Key = KeyPicker.Value;
 
                     if Key == 'MB1' or Key == 'MB2' then
                         if Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1
                         or Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2 then
-                            KeyPicker.Toggled = not KeyPicker.Toggled
-                            KeyPicker:DoClick()
+                            if KeyPicker.Mode == 'Tap' then
+                                KeyPicker:DoTap();
+                            else
+                                KeyPicker.Toggled = not KeyPicker.Toggled
+                                KeyPicker:DoClick()
+                            end
                         end;
                     elseif Input.UserInputType == Enum.UserInputType.Keyboard then
                         if Input.KeyCode.Name == Key then
-                            KeyPicker.Toggled = not KeyPicker.Toggled;
-                            KeyPicker:DoClick()
+                            if KeyPicker.Mode == 'Tap' then
+                                KeyPicker:DoTap();
+                            else
+                                KeyPicker.Toggled = not KeyPicker.Toggled;
+                                KeyPicker:DoClick()
+                            end
                         end;
                     end;
                 end;
@@ -3185,30 +3213,13 @@ do
     });
 
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 31, 0, 0);
-        Size = UDim2.new(1, -39, 1, 0);
+        Position = UDim2.new(0, 8, 0, 0);
+        Size = UDim2.new(1, -16, 1, 0);
         TextSize = 14;
-        TextXAlignment = Enum.TextXAlignment.Left;
+        TextXAlignment = Enum.TextXAlignment.Center;
         ZIndex = 203;
         Parent = InnerFrame;
     });
-
-    local WatermarkIconImage, WatermarkIconRectSize, WatermarkIconRectOffset = Library:GetIconAsset('plus');
-    local WatermarkIcon = Library:Create('ImageLabel', {
-        BackgroundTransparency = 1;
-        Image = WatermarkIconImage;
-        ImageRectSize = WatermarkIconRectSize;
-        ImageRectOffset = WatermarkIconRectOffset;
-        ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, 10, 0.5, -7);
-        Size = UDim2.fromOffset(14, 14);
-        ScaleType = Enum.ScaleType.Fit;
-        ZIndex = 203;
-        Parent = InnerFrame;
-    });
-    Library:AddToRegistry(WatermarkIcon, {
-        ImageColor3 = 'AccentColor';
-    }, true);
 
     Library.Watermark = WatermarkOuter;
     Library.WatermarkText = WatermarkLabel;
@@ -3327,7 +3338,7 @@ end;
 
 function Library:SetWatermark(Text)
     local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
-    Library.Watermark.Size = UDim2.new(0, X + 48, 0, math.max(34, Y + 14));
+    Library.Watermark.Size = UDim2.new(0, X + 28, 0, math.max(30, Y + 12));
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
@@ -3590,36 +3601,14 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(HeaderDivider, { BackgroundColor3 = 'OutlineColor' });
 
     local HeaderLeftPadding = 45;
-    local TitleIconBadge = Library:Create('Frame', {
-        BackgroundColor3 = Library.AccentColor;
-        BackgroundTransparency = 0.88;
-        BorderSizePixel = 0;
-        Position = UDim2.fromOffset(10, 3);
-        Size = UDim2.fromOffset(26, 26);
-        ZIndex = 3;
-        Parent = Header;
-    });
-    Library:AddCorner(TitleIconBadge, 8);
-    local TitleIconStroke = Instance.new('UIStroke');
-    TitleIconStroke.Color = Library.AccentColor;
-    TitleIconStroke.Thickness = 1;
-    TitleIconStroke.Transparency = 0.78;
-    TitleIconStroke.Parent = TitleIconBadge;
-    Library:AddToRegistry(TitleIconStroke, {
-        Color = 'AccentColor';
-    });
-    Library:AddToRegistry(TitleIconBadge, {
-        BackgroundColor3 = 'AccentColor';
-    });
-
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.fromOffset(4, 4);
-        Size = UDim2.fromOffset(18, 18);
+        Position = UDim2.fromOffset(13, 5);
+        Size = UDim2.fromOffset(20, 20);
         ScaleType = Enum.ScaleType.Fit;
-        ZIndex = 4;
-        Parent = TitleIconBadge;
+        ZIndex = 3;
+        Parent = Header;
     });
 
     local WindowLabel = Library:CreateLabel({
@@ -3870,7 +3859,9 @@ function Library:CreateWindow(...)
         };
 
         local HasIcon = Icon ~= nil and Icon ~= '';
-        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 14) + (HasIcon and 34 or 16);
+        local TabTextWidth = Library:GetTextBounds(Name, Library.Font, 14);
+        local TabButtonWidth = TabTextWidth + (HasIcon and 34 or 16);
+        local TabTextCenter = (HasIcon and 25 or 8) + TabTextWidth / 2;
 
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
@@ -3891,8 +3882,8 @@ function Library:CreateWindow(...)
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             AnchorPoint = Vector2.new(0.5, 1);
-            Position = UDim2.new(0.5, 0, 1, -2);
-            Size = UDim2.fromOffset(22, 3);
+            Position = UDim2.new(0, TabTextCenter, 1, 0);
+            Size = UDim2.fromOffset(math.min(16, math.max(10, TabTextWidth * 0.55)), 2);
             Visible = false;
             ZIndex = 2;
             Parent = TabButton;
@@ -3907,8 +3898,8 @@ function Library:CreateWindow(...)
             BackgroundTransparency = 0.82;
             BorderSizePixel = 0;
             AnchorPoint = Vector2.new(0.5, 1);
-            Position = UDim2.new(0.5, 0, 1, -1);
-            Size = UDim2.fromOffset(32, 5);
+            Position = UDim2.new(0, TabTextCenter, 1, 1);
+            Size = UDim2.fromOffset(math.min(24, math.max(16, TabTextWidth * 0.8)), 4);
             Visible = false;
             ZIndex = 1;
             Parent = TabButton;
