@@ -3644,6 +3644,70 @@ function Library:CreateWindow(...)
         });
     end;
 
+    local SearchBarContainer = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0.5, 0.5);
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0.5, 0, 0.5, 0);
+        Size = UDim2.new(0, 180, 0, 20);
+        ZIndex = 3;
+        Parent = Header;
+    });
+    Library:AddCorner(SearchBarContainer, 5);
+    Library:AddToRegistry(SearchBarContainer, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    local SearchBarInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
+        ZIndex = 4;
+        Parent = SearchBarContainer;
+    });
+    Library:AddCorner(SearchBarInner, 4);
+    Library:AddToRegistry(SearchBarInner, {
+        BackgroundColor3 = 'BackgroundColor';
+    });
+
+    local SearchIconImage, SearchIconRectSize, SearchIconRectOffset = Library:GetIconAsset('search');
+    local SearchIcon = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = SearchIconImage;
+        ImageRectSize = SearchIconRectSize;
+        ImageRectOffset = SearchIconRectOffset;
+        ImageColor3 = Library.FontColor;
+        Position = UDim2.new(0, 5, 0.5, -5);
+        Size = UDim2.fromOffset(10, 10);
+        ScaleType = Enum.ScaleType.Fit;
+        ZIndex = 5;
+        Parent = SearchBarInner;
+    });
+    Library:AddToRegistry(SearchIcon, {
+        ImageColor3 = 'FontColor';
+    });
+
+    local SearchBox = Library:Create('TextBox', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 20, 0, 0);
+        Size = UDim2.new(1, -24, 1, 0);
+        ClearTextOnFocus = false;
+        Font = Library.Font;
+        PlaceholderText = 'Search...';
+        PlaceholderColor3 = Color3.fromRGB(100, 100, 100);
+        Text = '';
+        TextColor3 = Library.FontColor;
+        TextSize = 12;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 5;
+        Parent = SearchBarInner;
+    });
+    Library:AddToRegistry(SearchBox, {
+        TextColor3 = 'FontColor';
+    });
+
     if Config.Status then
         local StatusColor = Color3.fromRGB(245, 245, 248);
         local BadgeBackground = Color3.fromRGB(24, 25, 28);
@@ -3727,69 +3791,6 @@ function Library:CreateWindow(...)
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = TabArea;
-    });
-
-    local SearchBarContainer = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(1, -208, 0, 0);
-        Size = UDim2.new(0, 200, 0, 21);
-        ZIndex = 1;
-        Parent = TabArea;
-    });
-    Library:AddCorner(SearchBarContainer, 5);
-    Library:AddToRegistry(SearchBarContainer, {
-        BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'OutlineColor';
-    });
-
-    local SearchBarInner = Library:Create('Frame', {
-        BackgroundColor3 = Library.BackgroundColor;
-        BorderSizePixel = 0;
-        Position = UDim2.new(0, 1, 0, 1);
-        Size = UDim2.new(1, -2, 1, -2);
-        ZIndex = 2;
-        Parent = SearchBarContainer;
-    });
-    Library:AddCorner(SearchBarInner, 4);
-    Library:AddToRegistry(SearchBarInner, {
-        BackgroundColor3 = 'BackgroundColor';
-    });
-
-    local SearchIconImage, SearchIconRectSize, SearchIconRectOffset = Library:GetIconAsset('search');
-    local SearchIcon = Library:Create('ImageLabel', {
-        BackgroundTransparency = 1;
-        Image = SearchIconImage;
-        ImageRectSize = SearchIconRectSize;
-        ImageRectOffset = SearchIconRectOffset;
-        ImageColor3 = Library.FontColor;
-        Position = UDim2.new(0, 6, 0.5, -6);
-        Size = UDim2.fromOffset(12, 12);
-        ScaleType = Enum.ScaleType.Fit;
-        ZIndex = 3;
-        Parent = SearchBarInner;
-    });
-    Library:AddToRegistry(SearchIcon, {
-        ImageColor3 = 'FontColor';
-    });
-
-    local SearchBox = Library:Create('TextBox', {
-        BackgroundTransparency = 1;
-        Position = UDim2.new(0, 24, 0, 0);
-        Size = UDim2.new(1, -28, 1, 0);
-        ClearTextOnFocus = false;
-        Font = Library.Font;
-        PlaceholderText = 'Search...';
-        PlaceholderColor3 = Color3.fromRGB(100, 100, 100);
-        Text = '';
-        TextColor3 = Library.FontColor;
-        TextSize = 13;
-        TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 3;
-        Parent = SearchBarInner;
-    });
-    Library:AddToRegistry(SearchBox, {
-        TextColor3 = 'FontColor';
     });
 
     local TabContainer = Library:Create('Frame', {
@@ -3883,28 +3884,28 @@ function Library:CreateWindow(...)
         local TabUnderline = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 4, 1, -2);
-            Size = UDim2.new(1, -8, 0, 2);
+            Position = UDim2.new(0, 4, 1, -1);
+            Size = UDim2.new(1, -8, 0, 1);
             Visible = false;
             ZIndex = 2;
             Parent = TabButton;
         });
-        Library:AddCorner(TabUnderline, 1);
+        Library:AddCorner(TabUnderline, 0.5);
         Library:AddToRegistry(TabUnderline, {
             BackgroundColor3 = 'AccentColor';
         });
 
         local TabUnderlineGlow = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
-            BackgroundTransparency = 0.5;
+            BackgroundTransparency = 0.7;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 2, 1, -4);
-            Size = UDim2.new(1, -4, 0, 4);
+            Position = UDim2.new(0, 3, 1, -2);
+            Size = UDim2.new(1, -6, 0, 2);
             Visible = false;
             ZIndex = 1;
             Parent = TabButton;
         });
-        Library:AddCorner(TabUnderlineGlow, 2);
+        Library:AddCorner(TabUnderlineGlow, 1);
         Library:AddToRegistry(TabUnderlineGlow, {
             BackgroundColor3 = 'AccentColor';
         });
