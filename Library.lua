@@ -3453,59 +3453,35 @@ function Library:CreateWindow(...)
             Parent = ScreenGui;
         });
 
-        for _ = 1, 120 do
-            local Size = SnowRandomizer:NextInteger(8, 28);
-            local Flake = Library:Create('Frame', {
+        local SnowflakeImage, SnowflakeRectSize, SnowflakeRectOffset = Library:GetIconAsset('snowflake');
+        for _ = 1, 28 do
+            local Size = SnowRandomizer:NextInteger(8, 15);
+            local Flake = Library:Create('ImageLabel', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
+                Image = SnowflakeImage;
+                ImageRectSize = SnowflakeRectSize;
+                ImageRectOffset = SnowflakeRectOffset;
+                ImageColor3 = Color3.fromRGB(215, 232, 255);
+                ImageTransparency = SnowRandomizer:NextNumber(0.35, 0.55);
                 Position = UDim2.fromScale(SnowRandomizer:NextNumber(), -0.1);
                 Size = UDim2.fromOffset(Size, Size);
                 Visible = false;
+                ScaleType = Enum.ScaleType.Fit;
                 ZIndex = 1;
                 Parent = SnowfallLayer;
             });
             local FlakeScale = Instance.new('UIScale');
-            FlakeScale.Scale = SnowRandomizer:NextNumber(0.6, 1.3);
+            FlakeScale.Scale = SnowRandomizer:NextNumber(0.75, 1);
             FlakeScale.Parent = Flake;
             SnowflakeScales[Flake] = FlakeScale;
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
             SnowflakeVelocities[Flake] = {
-                X = SnowRandomizer:NextNumber(-0.15, 0.15),
-                Y = SnowRandomizer:NextNumber(0.8, 1.4),
-                Drift = SnowRandomizer:NextNumber(-0.25, 0.25)
+                X = SnowRandomizer:NextNumber(-0.08, 0.08),
+                Y = SnowRandomizer:NextNumber(0.8, 1.2),
+                Drift = SnowRandomizer:NextNumber(-0.12, 0.12)
             };
-            SnowflakeRotations[Flake] = SnowRandomizer:NextNumber(-45, 45);
-
-            local IcyBlueWhite = Color3.fromRGB(215, 232, 255);
-            local RayTransparency = SnowRandomizer:NextNumber(0.15, 0.45);
-            for RayIndex = 0, 5 do
-                local Rotation = RayIndex * 60;
-                Library:Create('Frame', {
-                    AnchorPoint = Vector2.new(0.5, 0.5);
-                    BackgroundColor3 = IcyBlueWhite;
-                    BackgroundTransparency = RayTransparency;
-                    BorderSizePixel = 0;
-                    Position = UDim2.fromScale(0.5, 0.5);
-                    Rotation = Rotation;
-                    Size = UDim2.new(0, 1, 0.92, 0);
-                    ZIndex = 1;
-                    Parent = Flake;
-                });
-
-                for _, Branch in next, { -35, 35 } do
-                    Library:Create('Frame', {
-                        AnchorPoint = Vector2.new(0.5, 1);
-                        BackgroundColor3 = IcyBlueWhite;
-                        BackgroundTransparency = math.min(RayTransparency + 0.1, 0.7);
-                        BorderSizePixel = 0;
-                        Position = UDim2.new(0.5, 0, 0.35, 0);
-                        Rotation = Rotation + Branch;
-                        Size = UDim2.new(0, 1, 0.32, 0);
-                        ZIndex = 1;
-                        Parent = Flake;
-                    });
-                end;
-            end;
+            SnowflakeRotations[Flake] = SnowRandomizer:NextNumber(-20, 20);
 
             table.insert(Snowflakes, Flake);
         end;
@@ -4508,8 +4484,8 @@ function Library:CreateWindow(...)
                     FlakeScale.Scale = BaseScale;
                     local TwinkleTween = TweenService:Create(
                         FlakeScale,
-                        TweenInfo.new(SnowRandomizer:NextNumber(0.6, 1.3), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.15, 1.35) }
+                        TweenInfo.new(SnowRandomizer:NextNumber(1.5, 2.5), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.03, 1.08) }
                     );
                     SnowfallTwinkleTweens[Flake] = TwinkleTween;
                     TwinkleTween:Play();
@@ -4518,13 +4494,13 @@ function Library:CreateWindow(...)
                         while Generation == SnowfallGeneration and Toggled do
                             local StartX = SnowRandomizer:NextNumber(0, 1);
                             local DriftOffset = Velocity.Drift * SnowRandomizer:NextNumber(0.7, 1.3);
-                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.25, 0.25) + DriftOffset, 0, 1);
+                            local EndX = math.clamp(StartX + SnowRandomizer:NextNumber(-0.12, 0.12) + DriftOffset, 0, 1);
                             local StartY = FirstFall and SnowRandomizer:NextNumber(-0.18, 0.92) or SnowRandomizer:NextNumber(-0.2, -0.05);
                             Flake.Position = UDim2.fromScale(StartX, StartY);
                             Flake.Rotation = SnowRandomizer:NextNumber(-30, 30);
                             
-                            local FallDuration = SnowRandomizer:NextNumber(5, 14) / Velocity.Y;
-                            local RotationAmount = RotationSpeed * SnowRandomizer:NextNumber(1.5, 3.5);
+                            local FallDuration = SnowRandomizer:NextNumber(16, 26) / Velocity.Y;
+                            local RotationAmount = RotationSpeed * SnowRandomizer:NextNumber(0.5, 1.5);
                             
                             local FallTween = TweenService:Create(
                                 Flake,
