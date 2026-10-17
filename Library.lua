@@ -1415,9 +1415,9 @@ do
             Library.KeybindEmptyLabel.Visible = ActiveCount == 0;
             Library.KeybindFrame.Size = UDim2.new(
                 0,
-                math.max(XSize + 32, 190),
+                math.max(XSize + 38, 205),
                 0,
-                30 + math.max(YSize, 23) + 4
+                39 + math.max(YSize, 23)
             );
         end;
 
@@ -3185,13 +3185,30 @@ do
     });
 
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 8, 0, 0);
-        Size = UDim2.new(1, -16, 1, 0);
+        Position = UDim2.new(0, 31, 0, 0);
+        Size = UDim2.new(1, -39, 1, 0);
         TextSize = 14;
-        TextXAlignment = Enum.TextXAlignment.Center;
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
         Parent = InnerFrame;
     });
+
+    local WatermarkIconImage, WatermarkIconRectSize, WatermarkIconRectOffset = Library:GetIconAsset('snowflake');
+    local WatermarkIcon = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = WatermarkIconImage;
+        ImageRectSize = WatermarkIconRectSize;
+        ImageRectOffset = WatermarkIconRectOffset;
+        ImageColor3 = Library.AccentColor;
+        Position = UDim2.new(0, 10, 0.5, -7);
+        Size = UDim2.fromOffset(14, 14);
+        ScaleType = Enum.ScaleType.Fit;
+        ZIndex = 203;
+        Parent = InnerFrame;
+    });
+    Library:AddToRegistry(WatermarkIcon, {
+        ImageColor3 = 'AccentColor';
+    }, true);
 
     Library.Watermark = WatermarkOuter;
     Library.WatermarkText = WatermarkLabel;
@@ -3203,7 +3220,7 @@ do
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderColor3 = Color3.new(0, 0, 0);
         Position = UDim2.new(0, 10, 0.5, 0);
-        Size = UDim2.new(0, 190, 0, 57);
+        Size = UDim2.new(0, 205, 0, 61);
         Visible = false;
         ZIndex = 100;
         Parent = ScreenGui;
@@ -3227,11 +3244,15 @@ do
         BorderColor3 = 'OutlineColor';
     }, true);
 
+    local KeybindIconImage, KeybindIconRectSize, KeybindIconRectOffset = Library:GetIconAsset('keyboard');
     local KeybindIcon = Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
+        Image = KeybindIconImage;
+        ImageRectSize = KeybindIconRectSize;
+        ImageRectOffset = KeybindIconRectOffset;
         ImageColor3 = Library.FontColor;
-        Position = UDim2.fromOffset(9, 7);
-        Size = UDim2.fromOffset(14, 14);
+        Position = UDim2.fromOffset(10, 7);
+        Size = UDim2.fromOffset(15, 15);
         ZIndex = 104;
         Parent = KeybindInner;
     });
@@ -3243,8 +3264,8 @@ do
     local ColorFrame = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor;
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 9, 0, 27);
-        Size = UDim2.new(1, -18, 0, 1);
+        Position = UDim2.new(0, 10, 0, 29);
+        Size = UDim2.new(1, -20, 0, 1);
         ZIndex = 102;
         Parent = KeybindInner;
     });
@@ -3254,8 +3275,8 @@ do
     }, true);
 
     local KeybindLabel = Library:CreateLabel({
-        Size = UDim2.new(1, -40, 0, 24);
-        Position = UDim2.fromOffset(29, 2),
+        Size = UDim2.new(1, -46, 0, 26);
+        Position = UDim2.fromOffset(32, 2),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextSize = 14;
 
@@ -3266,20 +3287,20 @@ do
 
     local KeybindContainer = Library:Create('Frame', {
         BackgroundTransparency = 1;
-        Size = UDim2.new(1, -10, 1, -32);
-        Position = UDim2.new(0, 10, 0, 31);
+        Size = UDim2.new(1, -14, 1, -37);
+        Position = UDim2.new(0, 10, 0, 34);
         ZIndex = 103;
         Parent = KeybindInner;
     });
 
     local KeybindEmptyLabel = Library:CreateLabel({
         BackgroundTransparency = 1;
-        Size = UDim2.new(1, -2, 0, 21);
+        Size = UDim2.new(1, -2, 0, 22);
         Text = 'No binds active';
         TextColor3 = Color3.fromRGB(155, 155, 165);
         TextSize = 13;
         TextTransparency = 0.1;
-        TextXAlignment = Enum.TextXAlignment.Left;
+        TextXAlignment = Enum.TextXAlignment.Center;
         ZIndex = 104;
         Parent = KeybindContainer;
     }, true);
@@ -3306,7 +3327,7 @@ end;
 
 function Library:SetWatermark(Text)
     local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
-    Library.Watermark.Size = UDim2.new(0, X + 28, 0, math.max(30, Y + 12));
+    Library.Watermark.Size = UDim2.new(0, X + 48, 0, math.max(34, Y + 14));
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
@@ -3454,8 +3475,8 @@ function Library:CreateWindow(...)
         });
 
         local SnowflakeImage, SnowflakeRectSize, SnowflakeRectOffset = Library:GetIconAsset('snowflake');
-        for _ = 1, 48 do
-            local Size = SnowRandomizer:NextInteger(12, 20);
+        for _ = 1, 52 do
+            local Size = SnowRandomizer:NextInteger(16, 26);
             local Flake = Library:Create('ImageLabel', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3463,7 +3484,7 @@ function Library:CreateWindow(...)
                 ImageRectSize = SnowflakeRectSize;
                 ImageRectOffset = SnowflakeRectOffset;
                 ImageColor3 = Color3.fromRGB(215, 232, 255);
-                ImageTransparency = SnowRandomizer:NextNumber(0.2, 0.4);
+                ImageTransparency = SnowRandomizer:NextNumber(0.18, 0.38);
                 Position = UDim2.fromScale(SnowRandomizer:NextNumber(), -0.1);
                 Size = UDim2.fromOffset(Size, Size);
                 Visible = false;
@@ -3571,7 +3592,7 @@ function Library:CreateWindow(...)
     local HeaderLeftPadding = 47;
     local TitleIconBadge = Library:Create('Frame', {
         BackgroundColor3 = Library.AccentColor;
-        BackgroundTransparency = 1;
+        BackgroundTransparency = 0.86;
         BorderSizePixel = 0;
         Position = UDim2.fromOffset(11, 4);
         Size = UDim2.fromOffset(26, 24);
@@ -3855,6 +3876,7 @@ function Library:CreateWindow(...)
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
         });
 
         local TabUnderline = Library:Create('Frame', {
@@ -3898,9 +3920,10 @@ function Library:CreateWindow(...)
             Parent = TabButton;
         });
 
+        local TabIcon;
         if HasIcon then
             local IconImage, IconRectSize, IconRectOffset = Library:GetIconAsset(Icon);
-            local TabIcon = Library:Create('ImageLabel', {
+            TabIcon = Library:Create('ImageLabel', {
                 BackgroundTransparency = 1;
                 Image = IconImage;
                 ImageRectSize = IconRectSize;
@@ -3982,6 +4005,14 @@ function Library:CreateWindow(...)
 
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            TabButton.BorderColor3 = Library.AccentColor;
+            Library.RegistryMap[TabButton].Properties.BorderColor3 = 'AccentColor';
+            TabButtonLabel.TextColor3 = Library.AccentColor;
+            Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
+            if TabIcon then
+                TabIcon.ImageColor3 = Library.AccentColor;
+                Library.RegistryMap[TabIcon].Properties.ImageColor3 = 'AccentColor';
+            end;
             TabUnderline.Visible = true;
             TabUnderlineGlow.Visible = true;
             TabFrame.Visible = true;
@@ -3990,6 +4021,14 @@ function Library:CreateWindow(...)
         function Tab:HideTab()
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
+            TabButton.BorderColor3 = Library.OutlineColor;
+            Library.RegistryMap[TabButton].Properties.BorderColor3 = 'OutlineColor';
+            TabButtonLabel.TextColor3 = Library.FontColor;
+            Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
+            if TabIcon then
+                TabIcon.ImageColor3 = Library.FontColor;
+                Library.RegistryMap[TabIcon].Properties.ImageColor3 = 'FontColor';
+            end;
             TabUnderline.Visible = false;
             TabUnderlineGlow.Visible = false;
             TabFrame.Visible = false;
@@ -4487,7 +4526,7 @@ function Library:CreateWindow(...)
                     local TwinkleTween = TweenService:Create(
                         FlakeScale,
                         TweenInfo.new(SnowRandomizer:NextNumber(1.5, 2.5), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.03, 1.08) }
+                        { Scale = BaseScale * SnowRandomizer:NextNumber(1.04, 1.1) }
                     );
                     SnowfallTwinkleTweens[Flake] = TwinkleTween;
                     TwinkleTween:Play();
@@ -4502,7 +4541,8 @@ function Library:CreateWindow(...)
                             Flake.Rotation = SnowRandomizer:NextNumber(-30, 30);
                             
                             local FallDuration = SnowRandomizer:NextNumber(16, 26) / Velocity.Y;
-                            local RotationAmount = RotationSpeed * SnowRandomizer:NextNumber(0.5, 1.5);
+                            local RotationDirection = RotationSpeed < 0 and -1 or 1;
+                            local RotationAmount = RotationDirection * SnowRandomizer:NextNumber(360, 720);
                             
                             local FallTween = TweenService:Create(
                                 Flake,
