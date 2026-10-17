@@ -3454,8 +3454,8 @@ function Library:CreateWindow(...)
         });
 
         local SnowflakeImage, SnowflakeRectSize, SnowflakeRectOffset = Library:GetIconAsset('snowflake');
-        for _ = 1, 28 do
-            local Size = SnowRandomizer:NextInteger(8, 15);
+        for _ = 1, 48 do
+            local Size = SnowRandomizer:NextInteger(12, 20);
             local Flake = Library:Create('ImageLabel', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 BackgroundTransparency = 1;
@@ -3463,7 +3463,7 @@ function Library:CreateWindow(...)
                 ImageRectSize = SnowflakeRectSize;
                 ImageRectOffset = SnowflakeRectOffset;
                 ImageColor3 = Color3.fromRGB(215, 232, 255);
-                ImageTransparency = SnowRandomizer:NextNumber(0.35, 0.55);
+                ImageTransparency = SnowRandomizer:NextNumber(0.2, 0.4);
                 Position = UDim2.fromScale(SnowRandomizer:NextNumber(), -0.1);
                 Size = UDim2.fromOffset(Size, Size);
                 Visible = false;
@@ -3472,7 +3472,7 @@ function Library:CreateWindow(...)
                 Parent = SnowfallLayer;
             });
             local FlakeScale = Instance.new('UIScale');
-            FlakeScale.Scale = SnowRandomizer:NextNumber(0.75, 1);
+            FlakeScale.Scale = SnowRandomizer:NextNumber(0.85, 1.1);
             FlakeScale.Parent = Flake;
             SnowflakeScales[Flake] = FlakeScale;
             SnowflakeBaseScales[Flake] = FlakeScale.Scale;
@@ -3860,28 +3860,30 @@ function Library:CreateWindow(...)
         local TabUnderline = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 4, 1, -1);
-            Size = UDim2.new(1, -8, 0, 1);
+            AnchorPoint = Vector2.new(0.5, 1);
+            Position = UDim2.new(0.5, 0, 1, -2);
+            Size = UDim2.fromOffset(18, 2);
             Visible = false;
             ZIndex = 2;
             Parent = TabButton;
         });
-        Library:AddCorner(TabUnderline, 0.5);
+        Library:AddCorner(TabUnderline, 1);
         Library:AddToRegistry(TabUnderline, {
             BackgroundColor3 = 'AccentColor';
         });
 
         local TabUnderlineGlow = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
-            BackgroundTransparency = 0.7;
+            BackgroundTransparency = 0.82;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 3, 1, -2);
-            Size = UDim2.new(1, -6, 0, 2);
+            AnchorPoint = Vector2.new(0.5, 1);
+            Position = UDim2.new(0.5, 0, 1, -1);
+            Size = UDim2.fromOffset(28, 4);
             Visible = false;
             ZIndex = 1;
             Parent = TabButton;
         });
-        Library:AddCorner(TabUnderlineGlow, 1);
+        Library:AddCorner(TabUnderlineGlow, 2);
         Library:AddToRegistry(TabUnderlineGlow, {
             BackgroundColor3 = 'AccentColor';
         });
