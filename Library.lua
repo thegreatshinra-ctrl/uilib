@@ -1276,20 +1276,41 @@ do
         });
 
         local Modes = Info.Modes or { 'Always', 'Toggle', 'Hold', 'Tap' };
+        local ModeSelectWidth = 96;
+        local ModeRowHeight = 24;
         local ModeSelectOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.fromRGB(48, 49, 53);
-            BorderSizePixel = 0;
+            BorderColor3 = Library.OutlineColor;
+            BorderSizePixel = 1;
             Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y + 1);
-            Size = UDim2.new(0, 76, 0, 8 + (#Modes * 22));
+            Size = UDim2.new(0, ModeSelectWidth, 0, 10 + (#Modes * ModeRowHeight));
             Visible = false;
             ZIndex = 14;
             Parent = ScreenGui;
         });
-        Library:AddCorner(ModeSelectOuter, 6);
+        Library:AddCorner(ModeSelectOuter, 8);
+        Library:AddToRegistry(ModeSelectOuter, {
+            BorderColor3 = 'OutlineColor';
+        });
 
-        ToggleLabel:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
-            ModeSelectOuter.Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y + 1);
-        end);
+        local function PositionModeSelect()
+            local Position = ToggleLabel.AbsolutePosition;
+            local Viewport = ScreenGui.AbsoluteSize;
+            local X = Position.X + ToggleLabel.AbsoluteSize.X + 5;
+            local Y = Position.Y + 1;
+
+            if X + ModeSelectWidth > Viewport.X - 4 then
+                X = Position.X - ModeSelectWidth - 5;
+            end;
+
+            ModeSelectOuter.Position = UDim2.fromOffset(
+                math.clamp(X, 4, math.max(4, Viewport.X - ModeSelectWidth - 4)),
+                math.clamp(Y, 4, math.max(4, Viewport.Y - ModeSelectOuter.AbsoluteSize.Y - 4))
+            );
+        end;
+
+        ToggleLabel:GetPropertyChangedSignal('AbsolutePosition'):Connect(PositionModeSelect);
+        PositionModeSelect();
 
         local ModeSelectInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
@@ -1304,8 +1325,17 @@ do
         Library:AddToRegistry(ModeSelectInner, {
             BackgroundColor3 = 'MainColor';
         });
+        local ModeSelectStroke = Instance.new('UIStroke');
+        ModeSelectStroke.Color = Library.AccentColor;
+        ModeSelectStroke.Transparency = 0.88;
+        ModeSelectStroke.Thickness = 1;
+        ModeSelectStroke.Parent = ModeSelectOuter;
+        Library:AddToRegistry(ModeSelectStroke, {
+            Color = 'AccentColor';
+        });
 
         Library:Create('UIListLayout', {
+            Padding = UDim.new(0, 2);
             FillDirection = Enum.FillDirection.Vertical;
             SortOrder = Enum.SortOrder.LayoutOrder;
             Parent = ModeSelectInner;
@@ -1328,13 +1358,18 @@ do
             local Label = Library:CreateLabel({
                 Active = true;
                 BackgroundTransparency = 1;
-                Size = UDim2.new(1, -8, 0, 22);
-                Position = UDim2.new(0, 4, 0, 0);
+                BackgroundColor3 = Library.AccentColor;
+                Size = UDim2.new(1, -10, 0, ModeRowHeight - 2);
+                Position = UDim2.new(0, 5, 0, 0);
                 TextSize = 13;
                 Text = Mode;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 16;
                 Parent = ModeSelectInner;
+            });
+            Library:AddCorner(Label, 5);
+            Library:AddToRegistry(Label, {
+                BackgroundColor3 = 'AccentColor';
             });
 
             function ModeButton:Select()
@@ -1344,6 +1379,7 @@ do
 
                 KeyPicker.Mode = Mode;
 
+                Label.BackgroundTransparency = 0.88;
                 Label.TextColor3 = Library.AccentColor;
                 Library.RegistryMap[Label].Properties.TextColor3 = 'AccentColor';
 
@@ -1353,10 +1389,12 @@ do
             function ModeButton:Deselect()
                 KeyPicker.Mode = nil;
 
+                Label.BackgroundTransparency = 1;
                 Label.TextColor3 = Library.FontColor;
                 Library.RegistryMap[Label].Properties.TextColor3 = 'FontColor';
             end;
 
+            ModeButtons[Mode] = ModeButton;
             Label.InputBegan:Connect(function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 then
                     ModeButton:Select();
@@ -1368,7 +1406,6 @@ do
                 ModeButton:Select();
             end;
 
-            ModeButtons[Mode] = ModeButton;
         end;
 
         function KeyPicker:Update()
@@ -1544,6 +1581,7 @@ do
                     Event:Disconnect();
                 end);
             elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:MouseIsOverOpenedFrame() then
+                PositionModeSelect();
                 ModeSelectOuter.Visible = true;
             end;
         end);
@@ -1893,8 +1931,8 @@ do
 
             Library:Create('UIGradient', {
                 Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 38, 46)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 24, 29))
                 });
                 Rotation = 90;
                 Parent = Inner;
@@ -4123,16 +4161,16 @@ function Library:CreateWindow(...)
                 Size = UDim2.new(1, HasIcon and -40 or -16, 0, 18);
                 Position = UDim2.new(0, HasIcon and 34 or 8, 0, 2);
                 TextSize = 14;
-                TextColor3 = Color3.fromRGB(255, 255, 255);
+                TextColor3 = Library.FontColor;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
-            Library.RegistryMap[GroupboxLabel].Properties.TextColor3 = Color3.fromRGB(255, 255, 255);
 
             local GroupboxDivider = Library:Create('Frame', {
-                BackgroundColor3 = Library.OutlineColor;
+                BackgroundColor3 = Library.AccentColor;
+                BackgroundTransparency = 0.86;
                 BorderSizePixel = 0;
                 Position = UDim2.new(0, 8, 0, 27);
                 Size = UDim2.new(1, -16, 0, 1);
@@ -4140,7 +4178,7 @@ function Library:CreateWindow(...)
                 Parent = BoxInner;
             });
             Library:AddToRegistry(GroupboxDivider, {
-                BackgroundColor3 = 'OutlineColor';
+                BackgroundColor3 = 'AccentColor';
             });
 
             if HasIcon then
@@ -4150,12 +4188,15 @@ function Library:CreateWindow(...)
                     Image = IconImage;
                     ImageRectSize = IconRectSize;
                     ImageRectOffset = IconRectOffset;
-                    ImageColor3 = Color3.fromRGB(255, 255, 255);
+                    ImageColor3 = Library.AccentColor;
                     Position = UDim2.new(0, 8, 0, 3);
                     Size = UDim2.fromOffset(18, 18);
                     ScaleType = Enum.ScaleType.Fit;
                     ZIndex = 5;
                     Parent = BoxInner;
+                });
+                Library:AddToRegistry(IconLabel, {
+                    ImageColor3 = 'AccentColor';
                 });
             end;
 
