@@ -3642,7 +3642,7 @@ function Library:CreateWindow(...)
     Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = Config.TitleIcon or 'rbxassetid://72635809476881';
-        Position = UDim2.fromOffset(13, 5);
+        Position = UDim2.fromOffset(17, 5);
         Size = UDim2.fromOffset(20, 20);
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 3;
